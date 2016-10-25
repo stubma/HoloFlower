@@ -14,10 +14,10 @@ public class PlanesManager : Singleton<PlanesManager> {
 	public Material secondaryMaterial;
 	  
 	[Tooltip("Minimum number of floor planes required in order to exit scanning/processing mode.")]  
-	public uint minimumFloors = 1;
+	public uint minimumFloors = 0;
 	  
 	[Tooltip("Minimum number of wall planes required in order to exit scanning/processing mode.")]  
-	public uint minimumWalls = 1;
+	public uint minimumWalls = 0;
 	  
 	/// <summary>  
 	/// is mesh processed 
@@ -60,8 +60,12 @@ public class PlanesManager : Singleton<PlanesManager> {
 		List<GameObject> vertical = new List<GameObject>();  
 
 		// get planes
-		horizontal = SurfaceMeshesToPlanes.Instance.GetActivePlanes(PlaneTypes.Table | PlaneTypes.Floor);  
-		vertical = SurfaceMeshesToPlanes.Instance.GetActivePlanes(PlaneTypes.Wall);  
+		if(minimumFloors > 0) {
+			horizontal = SurfaceMeshesToPlanes.Instance.GetActivePlanes(PlaneTypes.Table | PlaneTypes.Floor);  
+		}
+		if(minimumWalls > 0) {
+			vertical = SurfaceMeshesToPlanes.Instance.GetActivePlanes(PlaneTypes.Wall);  
+		}
 
 		// if we get enough planes, go ahead
 		// if not, restart scanning
