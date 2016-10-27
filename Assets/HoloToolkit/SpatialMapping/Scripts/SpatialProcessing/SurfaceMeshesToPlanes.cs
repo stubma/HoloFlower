@@ -302,7 +302,7 @@ namespace HoloToolkit.Unity
         /// Sets visibility of planes based on their type.
         /// </summary>
         /// <param name="surfacePlane"></param>
-        private void SetPlaneVisibility(SurfacePlane surfacePlane)
+		private void SetPlaneVisibility(SurfacePlane surfacePlane)
         {
             surfacePlane.IsVisible = ((drawPlanesMask & surfacePlane.PlaneType) == surfacePlane.PlaneType);
         }
