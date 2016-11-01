@@ -89,11 +89,6 @@ public class MainController : MonoBehaviour {
 		}
 	}
 
-	private void showSurfaceBookPlaceholder() {
-		Renderer r = surfaceBookPlaceholder.GetComponent<Renderer>();
-		r.enabled = true;
-	}
-
 	private void hideSurfaceBookPlaceholder() {
 		Renderer r = surfaceBookPlaceholder.GetComponent<Renderer>();
 		r.enabled = false;
