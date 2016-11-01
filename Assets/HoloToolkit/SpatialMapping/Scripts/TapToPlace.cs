@@ -37,6 +37,12 @@ namespace HoloToolkit.Unity
         /// </summary>
         private bool placing;
 
+		// event handler
+		public delegate void EventHandler();
+
+		// placing end event
+		public event EventHandler PlacingEnd;
+
         private void Start()
         {
             // Make sure we have all the components in the scene we need.
@@ -84,6 +90,11 @@ namespace HoloToolkit.Unity
                 spatialMappingManager.DrawVisualMeshes = false;
                 // Add world anchor when object placement is done.
                 anchorManager.AttachAnchor(gameObject, SavedAnchorFriendlyName);
+
+				// delegate
+				if(PlacingEnd != null) {
+					PlacingEnd();
+				}
             }
         }
 
