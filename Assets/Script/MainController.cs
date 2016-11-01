@@ -13,6 +13,9 @@ public class MainController : MonoBehaviour {
 	[Tooltip("A rectangular used to locate surface book position")]
 	public GameObject surfaceBookPlaceholder;
 
+	[Tooltip("A model used to locate neobox")]
+	public GameObject neoboxPlaceholder;
+
 	// canvas distance
 	private float hintCanvasDistance;
 
@@ -40,9 +43,12 @@ public class MainController : MonoBehaviour {
 		// distance of hint canvas
 		hintCanvasDistance = hintCanvas.transform.position.magnitude; 
 
-		// listen place end event
-		TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
-		ttp.PlacingEnd += MainController_onPlacingEnd;
+		// hide neobox placeholder
+		hideNeoboxPlaceholder();
+
+		// force remove old anchor so that we will re-locate them
+		WorldAnchorManager.Instance.RemoveAnchor(surfaceBookPlaceholder);
+		WorldAnchorManager.Instance.RemoveAnchor(neoboxPlaceholder);
 
 		// init state
 		setState(OpState.LOCATE_SURFACE_BOOK);
@@ -67,6 +73,15 @@ public class MainController : MonoBehaviour {
 		case OpState.LOCATE_SURFACE_BOOK:
 			if(!isPlacing) {
 				TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
+				ttp.PlacingEnd += MainController_onPlacingEnd;
+				ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
+				isPlacing = true;
+			}
+			break;
+		case OpState.LOCATE_NEOBOX:
+			if(!isPlacing) {
+				TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
+				ttp.PlacingEnd += MainController_onPlacingEnd;
 				ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
 				isPlacing = true;
 			}
@@ -74,12 +89,51 @@ public class MainController : MonoBehaviour {
 		}
 	}
 
+	private void showSurfaceBookPlaceholder() {
+		Renderer r = surfaceBookPlaceholder.GetComponent<Renderer>();
+		r.enabled = true;
+	}
+
+	private void hideSurfaceBookPlaceholder() {
+		Renderer r = surfaceBookPlaceholder.GetComponent<Renderer>();
+		r.enabled = false;
+	}
+
+	private void hideNeoboxPlaceholder() {
+		neoboxPlaceholder.SetActive(false);
+	}
+
+	private void showNeoboxPlaceholder() {
+		neoboxPlaceholder.SetActive(true);
+	}
+
 	private void MainController_onPlacingEnd() {
 		switch(state) {
 		case OpState.LOCATE_SURFACE_BOOK:
-			isPlacing = false;
-			setState(OpState.LOCATE_NEOBOX);
-			break;
+			{
+				// reset flag and remove listener
+				isPlacing = false;
+				TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
+				ttp.PlacingEnd -= MainController_onPlacingEnd;
+				Destroy(ttp);
+				showNeoboxPlaceholder();
+
+				// switch state to locate neobox
+				setState(OpState.LOCATE_NEOBOX);
+				break;
+			}
+		case OpState.LOCATE_NEOBOX:
+			{
+				// reset flag and remove listener
+				isPlacing = false;
+				TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
+				ttp.PlacingEnd -= MainController_onPlacingEnd;
+				Destroy(ttp);
+
+				// to idle state
+				setState(OpState.IDLE);
+				break;
+			}
 		}
 	}
 
