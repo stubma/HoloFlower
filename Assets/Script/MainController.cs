@@ -16,6 +16,12 @@ public class MainController : MonoBehaviour {
 	[Tooltip("A model used to locate neobox")]
 	public GameObject neoboxPlaceholder;
 
+	[Tooltip("A operation canvas which displays when user gazes surface book")]
+	public Canvas surfaceOpCanvas;
+
+	[Tooltip("Grow text label")]
+	public Text growText;
+
 	// canvas distance
 	private float hintCanvasDistance;
 
@@ -31,7 +37,8 @@ public class MainController : MonoBehaviour {
 	private enum OpState {
 		IDLE = 0,
 		LOCATE_SURFACE_BOOK = 1,
-		LOCATE_NEOBOX = 2
+		LOCATE_NEOBOX = 2,
+		GROW_FLOWER = 3
 	}
 
 	/// <summary>
@@ -43,28 +50,56 @@ public class MainController : MonoBehaviour {
 		// distance of hint canvas
 		hintCanvasDistance = hintCanvas.transform.position.magnitude; 
 
-		// hide neobox placeholder
-		hideNeoboxPlaceholder();
+		// hide something
+		HideNeoboxPlaceholder();
 
 		// force remove old anchor so that we will re-locate them
 		WorldAnchorManager.Instance.RemoveAnchor(surfaceBookPlaceholder);
 		WorldAnchorManager.Instance.RemoveAnchor(neoboxPlaceholder);
 
 		// init state
-		setState(OpState.LOCATE_SURFACE_BOOK);
+		SetState(OpState.LOCATE_SURFACE_BOOK);
 	}
 
 	void Update () {
-		// let hint canvas follow camera
-		if(hintCanvas.gameObject.activeSelf) {
-			Vector3 dstPos = gameObject.transform.forward * hintCanvasDistance;
-			dstPos.y += 3f;
-			Vector3 srcPos = hintCanvas.transform.position;
-			float dist = (dstPos - srcPos).magnitude;
-			if(dist > 0) {
-				hintCanvas.transform.position = Vector3.Lerp(srcPos, dstPos, hintMoveSpeed / dist);
+		switch(state) {
+		case OpState.GROW_FLOWER:
+			// raycast to test whether hit surface book
+			RaycastHit hitInfo;
+			bool hit = Physics.Raycast(gameObject.transform.position, 
+				           gameObject.transform.forward, 
+				           out hitInfo,
+				           surfaceBookPlaceholder.transform.position.magnitude * 2,
+				           surfaceBookPlaceholder.layer);
+
+			// if hit, show operation button
+			// if not hit, hide operation buttion
+			if(hit && hitInfo.collider.gameObject == surfaceBookPlaceholder) {
+				Quaternion r = gameObject.transform.localRotation;
+				r.x = 0;
+				r.z = 0;
+				surfaceOpCanvas.transform.localRotation = r;
+				Vector3 pos = surfaceBookPlaceholder.transform.position;
+				pos.y += 0.5f;
+				surfaceOpCanvas.transform.position = pos;
+				FadeInSurfaceOpCanvas();
+			} else {
+				FadeOutSurfaceOpCanvas();
 			}
-			hintCanvas.transform.localRotation = gameObject.transform.localRotation;
+			break;
+		default:
+			// let hint canvas follow camera
+			if(hintCanvas.gameObject.activeSelf) {
+				Vector3 dstPos = gameObject.transform.forward * hintCanvasDistance;
+				dstPos.y += 3f;
+				Vector3 srcPos = hintCanvas.transform.position;
+				float dist = (dstPos - srcPos).magnitude;
+				if(dist > 0) {
+					hintCanvas.transform.position = Vector3.Lerp(srcPos, dstPos, hintMoveSpeed / dist);
+				}
+				hintCanvas.transform.localRotation = gameObject.transform.localRotation;
+			}
+			break;
 		}
 	}
 
@@ -89,17 +124,32 @@ public class MainController : MonoBehaviour {
 		}
 	}
 
-	private void hideSurfaceBookPlaceholder() {
+	private void HideSurfaceBookPlaceholder() {
 		Renderer r = surfaceBookPlaceholder.GetComponent<Renderer>();
 		r.enabled = false;
 	}
 
-	private void hideNeoboxPlaceholder() {
+	private void HideNeoboxPlaceholder() {
 		neoboxPlaceholder.SetActive(false);
 	}
 
-	private void showNeoboxPlaceholder() {
+	private void ShowNeoboxPlaceholder() {
 		neoboxPlaceholder.SetActive(true);
+	}
+
+	private void HideSurfaceOpCanvas() {
+		surfaceOpCanvas.gameObject.SetActive(false);
+	}
+
+	private void FadeInSurfaceOpCanvas() {
+		surfaceOpCanvas.gameObject.SetActive(true);
+		growText.GetComponent<CanvasRenderer>().SetAlpha(0);
+		growText.CrossFadeAlpha(1f, 0.2f, true);
+	}
+
+	private void FadeOutSurfaceOpCanvas() {
+		growText.GetComponent<CanvasRenderer>().SetAlpha(1);
+		growText.CrossFadeAlpha(0, 0.2f, true);
 	}
 
 	private void MainController_onPlacingEnd() {
@@ -111,10 +161,10 @@ public class MainController : MonoBehaviour {
 				TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
 				ttp.PlacingEnd -= MainController_onPlacingEnd;
 				Destroy(ttp);
-				showNeoboxPlaceholder();
+				ShowNeoboxPlaceholder();
 
 				// switch state to locate neobox
-				setState(OpState.LOCATE_NEOBOX);
+				SetState(OpState.LOCATE_NEOBOX);
 				break;
 			}
 		case OpState.LOCATE_NEOBOX:
@@ -126,13 +176,13 @@ public class MainController : MonoBehaviour {
 				Destroy(ttp);
 
 				// to idle state
-				setState(OpState.IDLE);
+				SetState(OpState.GROW_FLOWER);
 				break;
 			}
 		}
 	}
 
-	private void setState(OpState s) {
+	private void SetState(OpState s) {
 		state = s;
 		switch(state) {
 		case OpState.LOCATE_SURFACE_BOOK:
