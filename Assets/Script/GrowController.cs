@@ -18,10 +18,23 @@ public class GrowController : MonoBehaviour {
 		set;
 	}
 
+	// flag indicating if we should keep op canvas visible
+	public bool ShouldKeepOpCanvas {
+		get;
+		set;
+	}
+
 	// gaze timer
 	private bool isGazed;
 	private float gazeLeaveTime;
 	private bool isOpShown;
+
+	// is flower growed
+	private bool IsGrowed {
+		get {
+			return flower.activeSelf;
+		}
+	}
 
 	// Use this for initialization
 	void Start () {
@@ -32,21 +45,26 @@ public class GrowController : MonoBehaviour {
 		// init flag
 		IsPlaced = false;
 		isOpShown = false;
+		ShouldKeepOpCanvas = false;
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if(IsPlaced && !isGazed) {
-			// fade out if leave 5 seconds
-			gazeLeaveTime += Time.deltaTime;
-			if(gazeLeaveTime >= 5) {
-				FadeOutSurfaceOpCanvas();
+			if(ShouldKeepOpCanvas) {
+				gazeLeaveTime = 0;
+			} else {
+				// fade out if leave 5 seconds
+				gazeLeaveTime += Time.deltaTime;
+				if(gazeLeaveTime >= 5) {
+					FadeOutSurfaceOpCanvas();
+				}
 			}
 		}
 	}
 
 	public void OnGazeEnter() {
-		if(IsPlaced) {
+		if(IsPlaced && !IsGrowed) {
 			// place operation canvas
 			PlaceSurfaceOpCanvas();
 
@@ -59,25 +77,26 @@ public class GrowController : MonoBehaviour {
 	}
 
 	public void OnGazeLeave() {
-		if(IsPlaced) {
+		if(IsPlaced && !IsGrowed) {
 			// reset time
 			isGazed = false;
 			gazeLeaveTime = 0;
 		}
 	}
 
-	public void OnSelect() {
-		if(!flower.activeSelf) {
-			// get surface placeholder
-			MainController mc = Camera.main.GetComponent<MainController>();
-			GameObject surfaceBookPlaceholder = mc.surfaceBookPlaceholder;
-
+	public void GrowFlower() {
+		if(!IsGrowed) {
 			// place flower on it
 			flower.SetActive(true);
-			flower.transform.position = surfaceBookPlaceholder.transform.position;
-			flower.transform.localRotation = surfaceBookPlaceholder.transform.localRotation;
+			flower.transform.localRotation = gameObject.transform.localRotation;
+			Vector3 pos = gameObject.transform.position;
+			Renderer r = gameObject.GetComponent<Renderer>();
+			pos.y += r.bounds.extents.y;
+			flower.transform.position = pos;
 
 			// play grow animation
+			Animation anim = flower.GetComponent<Animation>();
+			anim.Play("Take 001");
 		}
 	}
 
@@ -100,7 +119,7 @@ public class GrowController : MonoBehaviour {
 		}
 	}
 
-	private void FadeOutSurfaceOpCanvas() {
+	public void FadeOutSurfaceOpCanvas() {
 		if(isOpShown) {
 			growText.GetComponent<CanvasRenderer>().SetAlpha(1);
 			growText.CrossFadeAlpha(0, 0.2f, true);
