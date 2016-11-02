@@ -16,12 +16,6 @@ public class MainController : MonoBehaviour {
 	[Tooltip("A model used to locate neobox")]
 	public GameObject neoboxPlaceholder;
 
-	[Tooltip("A operation canvas which displays when user gazes surface book")]
-	public Canvas surfaceOpCanvas;
-
-	[Tooltip("Grow text label")]
-	public Text growText;
-
 	// canvas distance
 	private float hintCanvasDistance;
 
@@ -37,8 +31,7 @@ public class MainController : MonoBehaviour {
 	private enum OpState {
 		IDLE = 0,
 		LOCATE_SURFACE_BOOK = 1,
-		LOCATE_NEOBOX = 2,
-		GROW_FLOWER = 3
+		LOCATE_NEOBOX = 2
 	}
 
 	/// <summary>
@@ -53,53 +46,27 @@ public class MainController : MonoBehaviour {
 		// hide something
 		HideNeoboxPlaceholder();
 
-		// force remove old anchor so that we will re-locate them
-		WorldAnchorManager.Instance.RemoveAnchor(surfaceBookPlaceholder);
-		WorldAnchorManager.Instance.RemoveAnchor(neoboxPlaceholder);
-
 		// init state
 		SetState(OpState.LOCATE_SURFACE_BOOK);
 	}
 
 	void Update () {
 		switch(state) {
-		case OpState.GROW_FLOWER:
-			// raycast to test whether hit surface book
-			RaycastHit hitInfo;
-			bool hit = Physics.Raycast(gameObject.transform.position, 
-				           gameObject.transform.forward, 
-				           out hitInfo,
-				           surfaceBookPlaceholder.transform.position.magnitude * 2,
-				           surfaceBookPlaceholder.layer);
-
-			// if hit, show operation button
-			// if not hit, hide operation buttion
-			if(hit && hitInfo.collider.gameObject == surfaceBookPlaceholder) {
-				Quaternion r = gameObject.transform.localRotation;
-				r.x = 0;
-				r.z = 0;
-				surfaceOpCanvas.transform.localRotation = r;
-				Vector3 pos = surfaceBookPlaceholder.transform.position;
-				pos.y += 0.5f;
-				surfaceOpCanvas.transform.position = pos;
-				FadeInSurfaceOpCanvas();
-			} else {
-				FadeOutSurfaceOpCanvas();
-			}
-			break;
 		default:
-			// let hint canvas follow camera
-			if(hintCanvas.gameObject.activeSelf) {
-				Vector3 dstPos = gameObject.transform.forward * hintCanvasDistance;
-				dstPos.y += 3f;
-				Vector3 srcPos = hintCanvas.transform.position;
-				float dist = (dstPos - srcPos).magnitude;
-				if(dist > 0) {
-					hintCanvas.transform.position = Vector3.Lerp(srcPos, dstPos, hintMoveSpeed / dist);
+			{
+				// let hint canvas follow camera
+				if(hintCanvas.gameObject.activeSelf) {
+					Vector3 dstPos = gameObject.transform.forward * hintCanvasDistance;
+					dstPos.y += 3f;
+					Vector3 srcPos = hintCanvas.transform.position;
+					float dist = (dstPos - srcPos).magnitude;
+					if(dist > 0) {
+						hintCanvas.transform.position = Vector3.Lerp(srcPos, dstPos, hintMoveSpeed / dist);
+					}
+					hintCanvas.transform.localRotation = gameObject.transform.localRotation;
 				}
-				hintCanvas.transform.localRotation = gameObject.transform.localRotation;
+				break;
 			}
-			break;
 		}
 	}
 
@@ -137,21 +104,6 @@ public class MainController : MonoBehaviour {
 		neoboxPlaceholder.SetActive(true);
 	}
 
-	private void HideSurfaceOpCanvas() {
-		surfaceOpCanvas.gameObject.SetActive(false);
-	}
-
-	private void FadeInSurfaceOpCanvas() {
-		surfaceOpCanvas.gameObject.SetActive(true);
-		growText.GetComponent<CanvasRenderer>().SetAlpha(0);
-		growText.CrossFadeAlpha(1f, 0.2f, true);
-	}
-
-	private void FadeOutSurfaceOpCanvas() {
-		growText.GetComponent<CanvasRenderer>().SetAlpha(1);
-		growText.CrossFadeAlpha(0, 0.2f, true);
-	}
-
 	private void MainController_onPlacingEnd() {
 		switch(state) {
 		case OpState.LOCATE_SURFACE_BOOK:
@@ -162,6 +114,10 @@ public class MainController : MonoBehaviour {
 				ttp.PlacingEnd -= MainController_onPlacingEnd;
 				Destroy(ttp);
 				ShowNeoboxPlaceholder();
+
+				// flag surface book is placed
+				GrowController gc = surfaceBookPlaceholder.GetComponent<GrowController>();
+				gc.IsPlaced = true;
 
 				// switch state to locate neobox
 				SetState(OpState.LOCATE_NEOBOX);
@@ -176,7 +132,7 @@ public class MainController : MonoBehaviour {
 				Destroy(ttp);
 
 				// to idle state
-				SetState(OpState.GROW_FLOWER);
+				SetState(OpState.IDLE);
 				break;
 			}
 		}
