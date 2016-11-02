@@ -36,6 +36,6 @@ public class PlaceToBed : MonoBehaviour {
         //duplicate.GetComponent<BoxCollider>().enabled = false;
         Interaction interaction = duplicate.AddComponent<Interaction>();
         interaction.MessageText = MessageText;
-        TargetManager.Instance.SetTarget(duplicate);
+        TargetManager.Instance.Target = duplicate;
     }
 }

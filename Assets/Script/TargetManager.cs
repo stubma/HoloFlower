@@ -1,30 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
+using HoloToolkit.Unity;
 
-public class TargetManager : MonoBehaviour {
+public class TargetManager : Singleton<TargetManager> {
+	[Tooltip("A box which contains handler to scale/rotate model")]
+	public GameObject manipulator;
 
-    public GameObject Manipulator;
+	// model to be printed
+	private GameObject target;
 
-    public static TargetManager Instance { get; private set; }
-    private GameObject target;
+	// property
+	public GameObject Target {
+		get {
+			return target;
+		}
+		set {
+			target = value;
+			manipulator.SetActive(target != null);
+		}
+	}
 
 	// Use this for initialization
-	void Start () {
-        Instance = this;
-    }
+	void Start() {
+		manipulator.SetActive(false);
+	}
 	
 	// Update is called once per frame
-	void Update () {
-        Manipulator.SetActive(target != null);
-    }
-
-    public void SetTarget(GameObject t)
-    {
-        target = t;
-    }
-
-    public GameObject GetTarget()
-    {
-        return target;
-    }
+	void Update() {
+	}
 }

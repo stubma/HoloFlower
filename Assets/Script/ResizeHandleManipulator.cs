@@ -56,11 +56,11 @@ public class ResizeHandleManipulator : MonoBehaviour {
     {
         if (GestureManager.Instance != null && GestureManager.Instance.ManipulationInProgress)
         {
-            if (GestureManager.Instance.FocusedObject == gameObject && TargetManager.Instance.GetTarget() != null)
+            if (GestureManager.Instance.FocusedObject == gameObject && TargetManager.Instance.Target != null)
             {
                 Manipulating = true;
 
-                target = TargetManager.Instance.GetTarget();
+                target = TargetManager.Instance.Target;
                 targetInterpolator = target.GetComponent<Interpolator>(); 
 
                 // In order to ensure that any manipulated objects move with the user, we do all our math relative to the camera,
