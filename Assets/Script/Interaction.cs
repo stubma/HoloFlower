@@ -192,7 +192,7 @@ public class Interaction : MonoBehaviour {
     private static PrintRequest getTransform()
     {
         PrintRequest request = new PrintRequest();
-        GameObject target = TargetManager.Instance.GetTarget();
+        GameObject target = TargetManager.Instance.Target;
         request.scale = target.transform.localScale.x;
         request.translation = new double[] { target.transform.localPosition.x, target.transform.localPosition.y, target.transform.localPosition.z };
         request.orientation = new double[] { target.transform.localRotation.w, target.transform.localRotation.x,

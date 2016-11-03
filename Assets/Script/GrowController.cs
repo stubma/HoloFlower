@@ -6,6 +6,9 @@ public class GrowController : MonoBehaviour {
 	[Tooltip("Flower object")]
 	public GameObject flower;
 
+	[Tooltip("Flower scale anchor as a flower container")]
+	public GameObject flowerAnchor;
+
 	[Tooltip("A operation canvas which displays when user gazes surface book")]
 	public Canvas surfaceOpCanvas;
 
@@ -32,14 +35,22 @@ public class GrowController : MonoBehaviour {
 	// is flower growed
 	private bool IsGrowed {
 		get {
-			return flower.activeSelf;
+			return flowerAnchor.activeSelf;
+		}
+	}
+
+	// is flower grow animation finished
+	private bool IsGrowAnimationDone {
+		get {
+			Animation anim = flower.GetComponent<Animation>();
+			return !anim.isPlaying && IsGrowed;
 		}
 	}
 
 	// Use this for initialization
 	void Start () {
 		// hide
-		flower.SetActive(false);
+		flowerAnchor.SetActive(false);
 		surfaceOpCanvas.gameObject.SetActive(false);
 
 		// init flag
@@ -50,6 +61,7 @@ public class GrowController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		// fade out operation canvas if leave too long
 		if(IsPlaced && !isGazed) {
 			if(ShouldKeepOpCanvas) {
 				gazeLeaveTime = 0;
@@ -60,6 +72,11 @@ public class GrowController : MonoBehaviour {
 					FadeOutSurfaceOpCanvas();
 				}
 			}
+		}
+
+		// make flower target if grow animation is done
+		if(IsGrowAnimationDone) {
+			TargetManager.Instance.Target = flowerAnchor;
 		}
 	}
 
@@ -87,12 +104,12 @@ public class GrowController : MonoBehaviour {
 	public void GrowFlower() {
 		if(!IsGrowed) {
 			// place flower on it
-			flower.SetActive(true);
-			flower.transform.localRotation = gameObject.transform.localRotation;
+			flowerAnchor.SetActive(true);
+			flowerAnchor.transform.localRotation = gameObject.transform.localRotation;
 			Vector3 pos = gameObject.transform.position;
 			Renderer r = gameObject.GetComponent<Renderer>();
 			pos.y += r.bounds.extents.y;
-			flower.transform.position = pos;
+			flowerAnchor.transform.position = pos;
 
 			// play grow animation
 			Animation anim = flower.GetComponent<Animation>();
