@@ -66,7 +66,6 @@ public class MoveHandleManipulator : MonoBehaviour {
 		Manipulating = false;
 	}
 
-
 	// Update is called once per frame
 	void Update() {
 		if(Manipulating) {

@@ -2,12 +2,7 @@
 using System.Collections;
 
 public class RotateHandlePosition : MonoBehaviour {
-
     public Vector3 RelativePosition;
-
-	// Use this for initialization
-	void Start () {
-    }
 	
 	// Update is called once per frame
 	void Update () {
