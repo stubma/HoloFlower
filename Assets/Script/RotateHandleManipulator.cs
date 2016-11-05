@@ -5,14 +5,13 @@ using HoloToolkit.Unity;
 public class RotateHandleManipulator : MonoBehaviour {
 	[Tooltip("How much to scale each axis of hand movement (camera relative) when manipulating the object")]
 	public Vector3 handPositionScale = new Vector3(2.0f, 2.0f, 4.0f);
-	// Default tuning values, expected to be modified per application
 
 	private Vector3 initialHandPosition;
 	private Vector3 initialObjectPosition;
 
 	private Interpolator targetInterpolator;
 
-	private bool Manipulating { get; set; }
+	private bool IsManipulating { get; set; }
 
 	private RotateHandlePosition rotateHandlePositionScript;
 	private Vector3 axis;
@@ -52,14 +51,15 @@ public class RotateHandleManipulator : MonoBehaviour {
 			GestureManager.Instance.ManipulationCanceled -= EndManipulation;
 		}
 
-		Manipulating = false;
+		IsManipulating = false;
 	}
 
 	private void BeginManipulation() {
 		if(GestureManager.Instance != null && GestureManager.Instance.ManipulationInProgress) {
 			if(GestureManager.Instance.FocusedObject == gameObject && TargetManager.Instance.Target != null) {
-				Manipulating = true;
+				IsManipulating = true;
 
+				// get target and interpolator if has
 				target = TargetManager.Instance.Target;
 				targetInterpolator = target.GetComponent<Interpolator>();
 
@@ -76,28 +76,28 @@ public class RotateHandleManipulator : MonoBehaviour {
 	}
 
 	private void EndManipulation() {
-		Manipulating = false;
+		IsManipulating = false;
 	}
 
 	void Update() {
-		if(Manipulating) {
+		if(IsManipulating) {
 			// First step is to figure out the delta between the initial hand position and the current hand position
-			Vector3 localHandPosition = Camera.main.transform.InverseTransformPoint(GestureManager.Instance.ManipulationHandPosition);
-			Vector3 initialHandToCurrentHand = localHandPosition - initialHandPosition;
+			Vector3 currentHandPosition = Camera.main.transform.InverseTransformPoint(GestureManager.Instance.ManipulationHandPosition);
+			Vector3 handDelta = currentHandPosition - initialHandPosition;
 
 			// When performing a manipulation gesture, the hand generally only translates a relatively small amount.
 			// If we move the object only as much as the hand itself moves, users can only make small adjustments before
 			// the hand is lost and the gesture completes.  To improve the usability of the gesture we scale each
 			// axis of hand movement by some amount (camera relative).  This value can be changed in the editor or
 			// at runtime based on the needs of individual movement scenarios.
-			Vector3 scaledLocalHandPositionDelta = Vector3.Scale(initialHandToCurrentHand, handPositionScale);
+			Vector3 scaledHandDelta = Vector3.Scale(handDelta, handPositionScale);
 
 			// Once we've figured out how much the object should move relative to the camera we apply that to the initial
 			// camera relative position.  This ensures that the object remains in the appropriate location relative to the camera
 			// and the hand as the camera moves.  The allows users to use both gaze and gesture to move objects.  Once they
 			// begin manipulating an object they can rotate their head or walk around and the object will move with them
 			// as long as they maintain the gesture, while still allowing adjustment via hand movement.
-			Vector3 localObjectPosition = initialObjectPosition + scaledLocalHandPositionDelta;
+			Vector3 localObjectPosition = initialObjectPosition + scaledHandDelta;
 			Vector3 worldObjectPosition = Camera.main.transform.TransformPoint(localObjectPosition);
 
 			Vector3 from = handleInitialPosition - targetInitialPosition;
