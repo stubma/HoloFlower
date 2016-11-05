@@ -71,23 +71,25 @@ public class MainController : MonoBehaviour {
 	}
 
 	void LateUpdate() {
-		switch(state) {
-		case OpState.LOCATE_SURFACE_BOOK:
-			if(!isPlacing) {
-				TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
-				ttp.PlacingEnd += MainController_onPlacingEnd;
-				ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
-				isPlacing = true;
+		lock(this) {
+			switch(state) {
+			case OpState.LOCATE_SURFACE_BOOK:
+				if(!isPlacing) {
+					TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
+					ttp.PlacingEnd += MainController_onPlacingEnd;
+					ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
+					isPlacing = true;
+				}
+				break;
+			case OpState.LOCATE_NEOBOX:
+				if(!isPlacing) {
+					TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
+					ttp.PlacingEnd += MainController_onPlacingEnd;
+					ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
+					isPlacing = true;
+				}
+				break;
 			}
-			break;
-		case OpState.LOCATE_NEOBOX:
-			if(!isPlacing) {
-				TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
-				ttp.PlacingEnd += MainController_onPlacingEnd;
-				ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
-				isPlacing = true;
-			}
-			break;
 		}
 	}
 
@@ -105,35 +107,37 @@ public class MainController : MonoBehaviour {
 	}
 
 	private void MainController_onPlacingEnd() {
-		switch(state) {
-		case OpState.LOCATE_SURFACE_BOOK:
-			{
-				// reset flag and remove listener
-				isPlacing = false;
-				TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
-				ttp.PlacingEnd -= MainController_onPlacingEnd;
-				Destroy(ttp);
-				ShowNeoboxPlaceholder();
+		lock(this) {
+			switch(state) {
+			case OpState.LOCATE_SURFACE_BOOK:
+				{
+					// reset flag and remove listener
+					isPlacing = false;
+					TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
+					ttp.PlacingEnd -= MainController_onPlacingEnd;
+					Destroy(ttp);
+					ShowNeoboxPlaceholder();
 
-				// flag surface book is placed
-				GrowController gc = surfaceBookPlaceholder.GetComponent<GrowController>();
-				gc.IsPlaced = true;
+					// switch state to locate neobox
+					SetState(OpState.LOCATE_NEOBOX);
+					break;
+				}
+			case OpState.LOCATE_NEOBOX:
+				{
+					// reset flag and remove listener
+					isPlacing = false;
+					TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
+					ttp.PlacingEnd -= MainController_onPlacingEnd;
+					Destroy(ttp);
 
-				// switch state to locate neobox
-				SetState(OpState.LOCATE_NEOBOX);
-				break;
-			}
-		case OpState.LOCATE_NEOBOX:
-			{
-				// reset flag and remove listener
-				isPlacing = false;
-				TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
-				ttp.PlacingEnd -= MainController_onPlacingEnd;
-				Destroy(ttp);
+					// flag surface and printer are placed
+					GrowController gc = surfaceBookPlaceholder.GetComponent<GrowController>();
+					gc.IsPlaced = true;
 
-				// to idle state
-				SetState(OpState.IDLE);
-				break;
+					// to idle state
+					SetState(OpState.IDLE);
+					break;
+				}
 			}
 		}
 	}

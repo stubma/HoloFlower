@@ -15,7 +15,7 @@ public class GrowController : MonoBehaviour {
 	[Tooltip("Grow text label")]
 	public Text growText;
 
-	// flag indicating placeholder is placed
+	// flag indicating all placeholders are placed
 	public bool IsPlaced {
 		get;
 		set;
