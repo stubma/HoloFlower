@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using System.Collections;
 using UnityEngine.UI;
+using HoloToolkit.Unity;
+
 #if !UNITY_EDITOR
 using Windows.Networking.Sockets;
 using Windows.Networking;
@@ -13,23 +15,19 @@ using System.Threading.Tasks;
 #endif
 using System.Net;
 
-public class DetectPrinter : MonoBehaviour {
+public class DetectPrinter : Singleton<DetectPrinter> {
+	public Text Text;
+	string message;
+	public static string address = "192.168.0.105";
+	// if false, the above address will be used, convenient for debugging
+	private bool enableDetection = true;
 
-    public static DetectPrinter Instance { get; private set; }
-
-    public Text Text;
-    string message;
-    public static string address = "192.168.0.105";
-    // if false, the above address will be used, convenient for debugging
-    private bool enableDetection = true;
-
-#if !UNITY_EDITOR
+	#if !UNITY_EDITOR
     DatagramSocket listenerSocket;
 #endif
 
-    // Use this for initialization
-    void Start () {
-        Instance = this;
+	// Use this for initialization
+	void Start() {
 #if !UNITY_EDITOR
         if (enableDetection)
         {
@@ -37,17 +35,16 @@ public class DetectPrinter : MonoBehaviour {
             Send();
         }
 #endif
-    }
+	}
 	
 	// Update is called once per frame
-	void Update ()
-    {
+	void Update() {
 #if !UNITY_EDITOR
         Text.text = address;
 #endif
-    }
+	}
 
-#if !UNITY_EDITOR
+	#if !UNITY_EDITOR
     public string getUrl()
     {
         return "http://" + address + ":8080/print/model";
