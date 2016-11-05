@@ -143,4 +143,9 @@ public class GrowController : MonoBehaviour {
 			isOpShown = false;
 		}
 	}
+
+	public void disableSurfaceOpCanvas() {
+		isOpShown = false;
+		surfaceOpCanvas.gameObject.SetActive(false);
+	}
 }

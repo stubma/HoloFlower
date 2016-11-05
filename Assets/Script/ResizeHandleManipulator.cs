@@ -14,10 +14,7 @@ public class ResizeHandleManipulator : MonoBehaviour {
 	private bool IsManipulating { get; set; }
 
 	private GameObject target;
-	private Vector3 initialPosition;
-
-	void Start() {
-	}
+	private Vector3 initialHandlePosition;
 
 	private void OnEnable() {
 		if(GestureManager.Instance != null) {
@@ -56,7 +53,7 @@ public class ResizeHandleManipulator : MonoBehaviour {
 				initialObjectPosition = Camera.main.transform.InverseTransformPoint(transform.position);
 
 				// initial handle position
-				initialPosition = transform.position;
+				initialHandlePosition = transform.position;
 			}
 		}
 	}
@@ -87,7 +84,7 @@ public class ResizeHandleManipulator : MonoBehaviour {
 			Vector3 worldObjectPosition = Camera.main.transform.TransformPoint(localObjectPosition);
 
 			// calculate new scale
-			float scale = worldObjectPosition.magnitude / initialPosition.magnitude;
+			float scale = worldObjectPosition.magnitude / initialHandlePosition.magnitude;
 			Vector3 newScale = target.transform.localScale * scale;
             
 			// If the object has an interpolator we should use it, otherwise just move the transform directly
