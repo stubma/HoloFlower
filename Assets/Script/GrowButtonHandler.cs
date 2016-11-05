@@ -38,7 +38,7 @@ public class GrowButtonHandler : MonoBehaviour {
 
 			// hide operation canvas immediately
 			gc.ShouldKeepOpCanvas = false;
-			gc.FadeOutSurfaceOpCanvas();
+			gc.DisableSurfaceOpCanvas();
 		}
 	}
 }
