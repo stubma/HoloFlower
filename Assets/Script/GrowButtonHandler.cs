@@ -6,10 +6,12 @@ public class GrowButtonHandler : MonoBehaviour {
 	private bool isGrowed;
 
 	void Start () {
+		// reset flag
 		isGrowed = false;
 	}
 
 	public void OnGazeEnter() {
+		// if gazed, keep grow button visible
 		MainController mc = Camera.main.GetComponent<MainController>();
 		GameObject sb = mc.surfaceBookPlaceholder;
 		GrowController gc = sb.GetComponent<GrowController>();
@@ -17,6 +19,7 @@ public class GrowButtonHandler : MonoBehaviour {
 	}
 
 	public void OnGazeLeave() {
+		// if not gazed, grow button can be hide
 		MainController mc = Camera.main.GetComponent<MainController>();
 		GameObject sb = mc.surfaceBookPlaceholder;
 		GrowController gc = sb.GetComponent<GrowController>();
@@ -24,8 +27,9 @@ public class GrowButtonHandler : MonoBehaviour {
 	}
 
 	public void OnSelect() {
-		// grow the flower
+		// if not growed yet
 		if(!isGrowed) {
+			// grow the flower
 			MainController mc = Camera.main.GetComponent<MainController>();
 			GameObject sb = mc.surfaceBookPlaceholder;
 			GrowController gc = sb.GetComponent<GrowController>();
