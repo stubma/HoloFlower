@@ -118,7 +118,12 @@ namespace HoloToolkit.Unity
                     // to how the object is placed.  For example, consider
                     // placing based on the bottom of the object's
                     // collider so it sits properly on surfaces.
-                    this.transform.position = hitInfo.point;
+					Vector3 pos = hitInfo.point;
+
+					// move bottom center to hit point
+					BoxCollider collider = gameObject.GetComponent<BoxCollider>();
+					pos.y += collider.bounds.size.y / 2;
+					transform.position = pos;
 
                     // Rotate this object to face the user.
                     Quaternion toQuat = Camera.main.transform.localRotation;
