@@ -4,26 +4,14 @@ using HoloToolkit.Unity;
 using UnityEngine.UI;
 
 public class MainController : MonoBehaviour {
-	[Tooltip("A canvas which holds hint message text")]
-	public Canvas hintCanvas;
-
-	[Tooltip("A text control which displays hint message")]
-	public Text hintText;
+	[Tooltip("A canvas which holds locate operation buttons")]
+	public Canvas locatePanel;
 
 	[Tooltip("A rectangular used to locate surface book position")]
 	public GameObject surfaceBookPlaceholder;
 
 	[Tooltip("A model used to locate neobox")]
 	public GameObject neoboxPlaceholder;
-
-	// canvas distance
-	private float hintCanvasDistance;
-
-	// hint move speed
-	private float hintMoveSpeed = 0.5f;
-
-	// is placing started?
-	private bool isPlacing = false;
 
 	/// <summary>
 	/// current state of app 
@@ -40,70 +28,76 @@ public class MainController : MonoBehaviour {
 	private OpState state;
 
 	void Start () {
-		// distance of hint canvas
-		hintCanvasDistance = hintCanvas.transform.position.magnitude; 
+		// place locate panel before user
+		float locatePanelDistance = locatePanel.transform.position.magnitude; 
+		Vector3 dstPos = gameObject.transform.forward * locatePanelDistance;
+		locatePanel.transform.position = dstPos;
+		locatePanel.transform.localRotation = gameObject.transform.localRotation;
 
 		// hide something
 		HideNeoboxPlaceholder();
+		HideSurfaceBookPlaceholder();
 
 		// init state
-		SetState(OpState.LOCATE_SURFACE_BOOK);
+		SetState(OpState.IDLE);
 	}
 
-	void Update () {
-		switch(state) {
-		default:
-			{
-				// let hint canvas follow camera
-				if(hintCanvas.gameObject.activeSelf) {
-					Vector3 dstPos = gameObject.transform.forward * hintCanvasDistance;
-					dstPos.y += 3f;
-					Vector3 srcPos = hintCanvas.transform.position;
-					float dist = (dstPos - srcPos).magnitude;
-					if(dist > 0) {
-						hintCanvas.transform.position = Vector3.Lerp(srcPos, dstPos, hintMoveSpeed / dist);
-					}
-					hintCanvas.transform.localRotation = gameObject.transform.localRotation;
-				}
-				break;
-			}
+	public void StartLocateSurfaceBook() {
+		if(state != OpState.LOCATE_SURFACE_BOOK) {
+			SetState(OpState.LOCATE_SURFACE_BOOK);
+			ShowSurfaceBookPlaceholder();
+			TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
+			ttp.PlacingEnd += MainController_onPlacingEnd;
+			ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
 		}
 	}
 
-	void LateUpdate() {
-		lock(this) {
-			switch(state) {
-			case OpState.LOCATE_SURFACE_BOOK:
-				if(!isPlacing) {
-					TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
-					ttp.PlacingEnd += MainController_onPlacingEnd;
-					ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
-					isPlacing = true;
-				}
-				break;
-			case OpState.LOCATE_NEOBOX:
-				if(!isPlacing) {
-					TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
-					ttp.PlacingEnd += MainController_onPlacingEnd;
-					ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
-					isPlacing = true;
-				}
-				break;
-			}
+	public void StartLocateNeobox() {
+		if(state != OpState.LOCATE_NEOBOX) {
+			SetState(OpState.LOCATE_NEOBOX);
+			ShowNeoboxPlaceholder();
+			TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
+			ttp.PlacingEnd += MainController_onPlacingEnd;
+			ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
+		}
+	}
+
+	private void TreeDisableRenderer(GameObject root) {
+		Renderer[] rList = root.GetComponentsInChildren<Renderer>();
+		foreach(Renderer r in rList) {
+			r.enabled = false;
+		}
+	}
+
+	private void TreeEnableRenderer(GameObject root) {
+		Renderer[] rList = root.GetComponentsInChildren<Renderer>();
+		foreach(Renderer r in rList) {
+			r.enabled = true;
 		}
 	}
 
 	private void HideSurfaceBookPlaceholder() {
-		Renderer r = surfaceBookPlaceholder.GetComponent<Renderer>();
-		r.enabled = false;
+		if(surfaceBookPlaceholder != null) {
+			TreeDisableRenderer(surfaceBookPlaceholder);
+		}
+	}
+
+	private void ShowSurfaceBookPlaceholder() {
+		if(surfaceBookPlaceholder != null) {
+			TreeEnableRenderer(surfaceBookPlaceholder);
+		}
 	}
 
 	private void HideNeoboxPlaceholder() {
-		neoboxPlaceholder.SetActive(false);
+		if(neoboxPlaceholder != null) {
+			TreeDisableRenderer(neoboxPlaceholder);
+		}
 	}
 
 	private void ShowNeoboxPlaceholder() {
-		neoboxPlaceholder.SetActive(true);
+		if(neoboxPlaceholder != null) {
+			TreeEnableRenderer(neoboxPlaceholder);
+		}
 	}
 
 	private void MainController_onPlacingEnd() {
@@ -111,31 +105,25 @@ public class MainController : MonoBehaviour {
 			switch(state) {
 			case OpState.LOCATE_SURFACE_BOOK:
 				{
-					// reset flag and remove listener
-					isPlacing = false;
+					// remove TapToPlace to disable placing function
 					TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
 					ttp.PlacingEnd -= MainController_onPlacingEnd;
 					Destroy(ttp);
-					ShowNeoboxPlaceholder();
-
-					// switch state to locate neobox
-					SetState(OpState.LOCATE_NEOBOX);
 					break;
 				}
 			case OpState.LOCATE_NEOBOX:
 				{
-					// reset flag and remove listener
-					isPlacing = false;
+					// remove TapToPlace to disable placing function
 					TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
 					ttp.PlacingEnd -= MainController_onPlacingEnd;
 					Destroy(ttp);
 
-					// flag surface and printer are placed
-					GrowController gc = surfaceBookPlaceholder.GetComponent<GrowController>();
-					gc.IsPlaced = true;
-
 					// to idle state
 					SetState(OpState.IDLE);
+
+					// hide locate panel
+					locatePanel.gameObject.SetActive(false);
+
 					break;
 				}
 			}
@@ -144,21 +132,5 @@ public class MainController : MonoBehaviour {
 
 	private void SetState(OpState s) {
 		state = s;
-		switch(state) {
-		case OpState.LOCATE_SURFACE_BOOK:
-			// show hint
-			hintCanvas.gameObject.SetActive(true);
-			hintText.text = "Locate Your Surface Book";
-			isPlacing = false;
-			break;
-		case OpState.LOCATE_NEOBOX:
-			hintCanvas.gameObject.SetActive(true);
-			hintText.text = "Locate Neobox";
-			isPlacing = false;
-			break;
-		default:
-			hintCanvas.gameObject.SetActive(false);
-			break;
-		}
 	}
 }
