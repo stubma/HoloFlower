@@ -36,13 +36,15 @@ public class TooltipDisplayer : MonoBehaviour {
 		// create game object
 		GameObject obj = new GameObject("tooltip");
 		obj.transform.parent = transform;
+		obj.transform.localRotation = Quaternion.Inverse(obj.transform.parent.localRotation);
+		Vector3 parentScale = obj.transform.parent.localScale;
 
 		// create text component
 		Text t = obj.AddComponent<Text>();
 		t.text = str;
 		t.font = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
 		t.fontSize = 14;
-		t.transform.localScale = new Vector3(0.004f, 0.0025f, 1);
+		t.transform.localScale = new Vector3(0.002f / parentScale.x, 0.002f / parentScale.y, 1 / parentScale.z);
 		t.alignment = TextAnchor.MiddleCenter;
 
 		// adjust size

@@ -70,6 +70,11 @@ public class MainController : MonoBehaviour {
 					// remove TapToPlace to disable placing function
 					TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
 					Destroy(ttp);
+
+					// fade out body
+					PlaceholderController pc = surfaceBookPlaceholder.GetComponent<PlaceholderController>();
+					pc.FadeOutBody();
+
 					break;
 				}
 			case OpState.LOCATE_NEOBOX:
