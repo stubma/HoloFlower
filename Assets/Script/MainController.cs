@@ -35,8 +35,8 @@ public class MainController : MonoBehaviour {
 		locatePanel.transform.localRotation = gameObject.transform.localRotation;
 
 		// hide something
-		HideNeoboxPlaceholder();
-		HideSurfaceBookPlaceholder();
+		Helper.TreeDisableRenderer(neoboxPlaceholder);
+		Helper.TreeDisableRenderer(surfaceBookPlaceholder);
 
 		// init state
 		SetState(OpState.IDLE);
@@ -45,7 +45,7 @@ public class MainController : MonoBehaviour {
 	public void StartLocateSurfaceBook() {
 		if(state != OpState.LOCATE_SURFACE_BOOK) {
 			SetState(OpState.LOCATE_SURFACE_BOOK);
-			ShowSurfaceBookPlaceholder();
+			Helper.TreeEnableRenderer(surfaceBookPlaceholder);
 			TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
 			ttp.PlacingEnd += MainController_onPlacingEnd;
 			ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
@@ -55,48 +55,10 @@ public class MainController : MonoBehaviour {
 	public void StartLocateNeobox() {
 		if(state != OpState.LOCATE_NEOBOX) {
 			SetState(OpState.LOCATE_NEOBOX);
-			ShowNeoboxPlaceholder();
+			Helper.TreeEnableRenderer(neoboxPlaceholder);
 			TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
 			ttp.PlacingEnd += MainController_onPlacingEnd;
 			ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
-		}
-	}
-
-	private void TreeDisableRenderer(GameObject root) {
-		Renderer[] rList = root.GetComponentsInChildren<Renderer>();
-		foreach(Renderer r in rList) {
-			r.enabled = false;
-		}
-	}
-
-	private void TreeEnableRenderer(GameObject root) {
-		Renderer[] rList = root.GetComponentsInChildren<Renderer>();
-		foreach(Renderer r in rList) {
-			r.enabled = true;
-		}
-	}
-
-	private void HideSurfaceBookPlaceholder() {
-		if(surfaceBookPlaceholder != null) {
-			TreeDisableRenderer(surfaceBookPlaceholder);
-		}
-	}
-
-	private void ShowSurfaceBookPlaceholder() {
-		if(surfaceBookPlaceholder != null) {
-			TreeEnableRenderer(surfaceBookPlaceholder);
-		}
-	}
-
-	private void HideNeoboxPlaceholder() {
-		if(neoboxPlaceholder != null) {
-			TreeDisableRenderer(neoboxPlaceholder);
-		}
-	}
-
-	private void ShowNeoboxPlaceholder() {
-		if(neoboxPlaceholder != null) {
-			TreeEnableRenderer(neoboxPlaceholder);
 		}
 	}
 
@@ -107,7 +69,6 @@ public class MainController : MonoBehaviour {
 				{
 					// remove TapToPlace to disable placing function
 					TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
-					ttp.PlacingEnd -= MainController_onPlacingEnd;
 					Destroy(ttp);
 					break;
 				}
@@ -115,7 +76,6 @@ public class MainController : MonoBehaviour {
 				{
 					// remove TapToPlace to disable placing function
 					TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
-					ttp.PlacingEnd -= MainController_onPlacingEnd;
 					Destroy(ttp);
 
 					// to idle state
