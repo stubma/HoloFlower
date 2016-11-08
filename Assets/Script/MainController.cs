@@ -83,6 +83,10 @@ public class MainController : MonoBehaviour {
 					TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
 					Destroy(ttp);
 
+					// fade out body
+					PlaceholderController pc = neoboxPlaceholder.GetComponent<PlaceholderController>();
+					pc.FadeOutBody();
+
 					// to idle state
 					SetState(OpState.IDLE);
 

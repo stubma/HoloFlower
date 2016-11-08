@@ -17,9 +17,8 @@ public class PlaceholderController : MonoBehaviour {
 		if(isFadingOutBody) {
 			startTime += Time.deltaTime;
 			startTime = Math.Min(startTime, duration);
-			Debug.Log("start time is " + startTime);
 			body.GetComponent<Renderer>().material.color = Color.Lerp(startColor, endColor, startTime / duration);
-			if(startTime >= Time.deltaTime) {
+			if(startTime >= duration) {
 				isFadingOutBody = false;
 			}
 		}
