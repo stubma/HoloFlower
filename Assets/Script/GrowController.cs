@@ -16,6 +16,12 @@ public class GrowController : MonoBehaviour {
 	[Tooltip("Canvas which holds edit buttons for flower")]
 	public GameObject editCanvas;
 
+	// flag indicating flower editing is ongoing or not
+	public bool IsEditing {
+		get;
+		set;
+	}
+
 	// flower bound
 	private Bounds flowerBound;
 	public Bounds FlowerBound {
@@ -41,6 +47,9 @@ public class GrowController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		// init
+		IsEditing = false;
+
 		// place and hide grow button
 		Collider growCollider = growButton.GetComponent<Collider>();
 		Bounds growBound = growCollider.bounds;
