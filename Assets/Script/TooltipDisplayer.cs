@@ -6,6 +6,9 @@ public class TooltipDisplayer : MonoBehaviour {
 	[Tooltip("Tooltip text to be shown")]
 	public string tooltip;
 
+	[Tooltip("Tooltip text y axis offset")]
+	public float offsetY;
+
 	// ui text to display tooltip
 	private Text tooltipText;
 
@@ -21,6 +24,7 @@ public class TooltipDisplayer : MonoBehaviour {
 		Vector3 pos = Vector3.zero;
 		pos.y += b.size.y / 2;
 		pos.y += tooltipText.GetComponent<RectTransform>().rect.height / 2 * tooltipText.transform.localScale.y;
+		pos.y += offsetY;
 		tooltipText.transform.localPosition = pos;
 	}
 
