@@ -16,6 +16,14 @@ public class GrowController : MonoBehaviour {
 	[Tooltip("Canvas which holds edit buttons for flower")]
 	public GameObject editCanvas;
 
+	// flower bound
+	private Bounds flowerBound;
+	public Bounds FlowerBound {
+		get {
+			return flowerBound;
+		}
+	}
+
 	// is flower growed
 	public bool IsGrowed {
 		get {
@@ -47,6 +55,12 @@ public class GrowController : MonoBehaviour {
 		// hide edit canvas
 		editCanvas.SetActive(false);
 
+		// get flower bounds
+		// remove collider after get bounds, we don't need collision on flower
+		BoxCollider flowerCollider = flowerBox.GetComponent<BoxCollider>();
+		flowerBound = flowerCollider.bounds;
+		Destroy(flowerCollider);
+
 		// hide flower
 		flowerBox.SetActive(false);
 	}
@@ -68,10 +82,10 @@ public class GrowController : MonoBehaviour {
 	void LateUpdate() {
 		if(IsGrowAnimationDone && editCanvas.activeSelf) {
 			// get flower size, scaled
-			BoxCollider flowerCollider = flowerBox.GetComponent<BoxCollider>();
-			Bounds flowerBound = flowerCollider.bounds;
+			// multiply with sqrt 2 for 45 degree situation
 			Vector3 flowerScale = flowerBox.transform.localScale;
 			float flowerSize = flowerScale.x * flowerBound.size.x;
+			flowerSize *= (float)Math.Sqrt(2);
 
 			// update edit canvas position
 			PlaceholderResizer pr = gameObject.GetComponent<PlaceholderResizer>();
