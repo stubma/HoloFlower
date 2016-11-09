@@ -12,12 +12,6 @@ public class GrowController : MonoBehaviour {
 	[Tooltip("Grow button, user click to grow flower")]
 	public GameObject growButton;
 
-	// flag indicating all placeholders are placed
-	public bool IsPlaced {
-		get;
-		set;
-	}
-
 	// is flower growed
 	private bool IsGrowed {
 		get {
@@ -36,17 +30,18 @@ public class GrowController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		// place grow button
-		Bounds b = growButton.GetComponent<Collider>().bounds;
+		Collider growCollider = growButton.GetComponent<Collider>();
+		Bounds b = growCollider.bounds;
 		PlaceholderResizer pr = gameObject.GetComponent<PlaceholderResizer>();
 		float length = pr.length;
 		float width = pr.width;
-		growButton.transform.localPosition = new Vector3(0, b.size.y / 2, width / 2 + b.size.z / 2 + 0.01f);
+		growButton.transform.localPosition = new Vector3(0, b.size.y / 2, width / 2 + b.size.z / 2 + 0.02f);
+		growButton.transform.localScale = new Vector3(length / b.size.x, 1, 1);
+		growCollider.enabled = false;
+		growButton.SetActive(false);
 
 		// hide flower
 		flowerAnchor.SetActive(false);
-
-		// init flag
-		IsPlaced = false;
 	}
 	
 	// Update is called once per frame
@@ -71,5 +66,12 @@ public class GrowController : MonoBehaviour {
 			Animation anim = flower.GetComponent<Animation>();
 			anim.Play("Take 001");
 		}
+	}
+
+	public void EnableGrowButton() {
+		growButton.SetActive(true);
+		Collider growCollider = growButton.GetComponent<Collider>();
+		growCollider.enabled = true;
+		Helper.TreeEnableRenderer(growButton);
 	}
 }

@@ -87,11 +87,15 @@ public class MainController : MonoBehaviour {
 					PlaceholderController pc = neoboxPlaceholder.GetComponent<PlaceholderController>();
 					pc.FadeOutBody();
 
-					// to idle state
-					SetState(OpState.IDLE);
+					// enable grow button
+					GrowController gc = surfaceBookPlaceholder.GetComponent<GrowController>();
+					gc.EnableGrowButton();
 
 					// hide locate panel
 					locatePanel.gameObject.SetActive(false);
+
+					// to idle state
+					SetState(OpState.IDLE);
 
 					break;
 				}
