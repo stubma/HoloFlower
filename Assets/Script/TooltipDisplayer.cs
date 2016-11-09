@@ -32,6 +32,11 @@ public class TooltipDisplayer : MonoBehaviour {
 		tooltipText.CrossFadeAlpha(0, 0.2f, true);
 	}
 
+	void OnEnable() {
+		// initially set alpha to 0
+		tooltipText.GetComponent<CanvasRenderer>().SetAlpha(0);
+	}
+
 	private Text CreateUIText(string str) {
 		// create game object
 		GameObject obj = new GameObject("tooltip");

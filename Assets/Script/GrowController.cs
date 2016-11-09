@@ -12,8 +12,11 @@ public class GrowController : MonoBehaviour {
 	[Tooltip("Grow button, user click to grow flower")]
 	public GameObject growButton;
 
+	[Tooltip("Canvas which holds edit buttons for flower")]
+	public GameObject editCanvas;
+
 	// is flower growed
-	private bool IsGrowed {
+	public bool IsGrowed {
 		get {
 			return flowerAnchor.activeSelf;
 		}
@@ -29,16 +32,21 @@ public class GrowController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		// place grow button
+		// place and hide grow button
 		Collider growCollider = growButton.GetComponent<Collider>();
-		Bounds b = growCollider.bounds;
+		Bounds growBound = growCollider.bounds;
 		PlaceholderResizer pr = gameObject.GetComponent<PlaceholderResizer>();
 		float length = pr.length;
 		float width = pr.width;
-		growButton.transform.localPosition = new Vector3(0, b.size.y / 2, width / 2 + b.size.z / 2 + 0.02f);
-		growButton.transform.localScale = new Vector3(length / b.size.x, 1, 1);
+		growButton.transform.localPosition = new Vector3(0, growBound.size.y / 2, width / 2 + growBound.size.z / 2 + 0.02f);
+		growButton.transform.localScale = new Vector3(length / growBound.size.x, 1, 1);
 		growCollider.enabled = false;
 		growButton.SetActive(false);
+
+		// place and hide edit canvas
+		RectTransform editTransform = editCanvas.GetComponent<RectTransform>();
+		editCanvas.transform.localPosition = new Vector3(length / 2 + editTransform.rect.width / 2 + 0.05f, editTransform.rect.height / 2, 0);
+		editCanvas.SetActive(false);
 
 		// hide flower
 		flowerAnchor.SetActive(false);
@@ -46,9 +54,13 @@ public class GrowController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		// make flower target if grow animation is done
 		if(IsGrowAnimationDone) {
+			// make flower target if grow animation is done
 			TargetManager.Instance.Target = flowerAnchor;
+
+			// show edit canvas
+			editCanvas.SetActive(true);
+			Helper.TreeEnableRenderer(editCanvas);
 		}
 	}
 

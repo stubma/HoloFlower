@@ -6,7 +6,7 @@ public class PlaceholderController : MonoBehaviour {
 	[Tooltip("body object")]
 	public GameObject body;
 
-	// is fading out body
+	// for fading out body
 	private bool isFadingOutBody = false;
 	private float duration = 1.0f;
 	private Color startColor;
@@ -14,6 +14,7 @@ public class PlaceholderController : MonoBehaviour {
 	private float startTime = 0;
 
 	void Update() {
+		// fade out body if flag is set
 		if(isFadingOutBody) {
 			startTime += Time.deltaTime;
 			startTime = Math.Min(startTime, duration);
@@ -24,6 +25,9 @@ public class PlaceholderController : MonoBehaviour {
 		}
 	}
 
+	/// <summary>
+	/// Fade out body part
+	/// </summary>
 	public void FadeOutBody() {
 		isFadingOutBody = true;
 		startColor = body.GetComponent<Renderer>().material.color;
