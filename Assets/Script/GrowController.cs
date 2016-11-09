@@ -6,8 +6,8 @@ public class GrowController : MonoBehaviour {
 	[Tooltip("Flower object")]
 	public GameObject flower;
 
-	[Tooltip("Flower scale anchor as a flower container")]
-	public GameObject flowerAnchor;
+	[Tooltip("Flower container to hold flower animation and set custom scale anchor")]
+	public GameObject flowerBox;
 
 	[Tooltip("Grow button, user click to grow flower")]
 	public GameObject growButton;
@@ -18,7 +18,7 @@ public class GrowController : MonoBehaviour {
 	// is flower growed
 	public bool IsGrowed {
 		get {
-			return flowerAnchor.activeSelf;
+			return flowerBox.activeSelf;
 		}
 	}
 
@@ -49,14 +49,14 @@ public class GrowController : MonoBehaviour {
 		editCanvas.SetActive(false);
 
 		// hide flower
-		flowerAnchor.SetActive(false);
+		flowerBox.SetActive(false);
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if(IsGrowAnimationDone) {
 			// make flower target if grow animation is done
-			TargetManager.Instance.Target = flowerAnchor;
+			TargetManager.Instance.Target = flowerBox;
 
 			// show edit canvas
 			editCanvas.SetActive(true);
@@ -67,12 +67,12 @@ public class GrowController : MonoBehaviour {
 	public void GrowFlower() {
 		if(!IsGrowed) {
 			// place flower on it
-			flowerAnchor.SetActive(true);
-			flowerAnchor.transform.localRotation = gameObject.transform.localRotation;
+			flowerBox.SetActive(true);
+			flowerBox.transform.localRotation = gameObject.transform.localRotation;
 			Vector3 pos = gameObject.transform.position;
 			BoxCollider c = gameObject.GetComponent<BoxCollider>();
 			pos.y += c.bounds.extents.y;
-			flowerAnchor.transform.position = pos;
+			flowerBox.transform.position = pos;
 
 			// play grow animation
 			Animation anim = flower.GetComponent<Animation>();
