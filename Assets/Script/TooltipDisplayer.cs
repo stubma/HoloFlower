@@ -38,7 +38,9 @@ public class TooltipDisplayer : MonoBehaviour {
 
 	void OnEnable() {
 		// initially set alpha to 0
-		tooltipText.GetComponent<CanvasRenderer>().SetAlpha(0);
+		if(tooltipText != null) {
+			tooltipText.GetComponent<CanvasRenderer>().SetAlpha(0);
+		}
 	}
 
 	private Text CreateUIText(string str) {
