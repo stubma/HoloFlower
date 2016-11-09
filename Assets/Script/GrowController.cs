@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
 
 public class GrowController : MonoBehaviour {
 	[Tooltip("Flower object")]
@@ -43,9 +44,7 @@ public class GrowController : MonoBehaviour {
 		growCollider.enabled = false;
 		growButton.SetActive(false);
 
-		// place and hide edit canvas
-		RectTransform editTransform = editCanvas.GetComponent<RectTransform>();
-		editCanvas.transform.localPosition = new Vector3(length / 2 + editTransform.rect.width / 2 + 0.05f, editTransform.rect.height / 2, 0);
+		// hide edit canvas
 		editCanvas.SetActive(false);
 
 		// hide flower
@@ -59,8 +58,27 @@ public class GrowController : MonoBehaviour {
 			TargetManager.Instance.Target = flowerBox;
 
 			// show edit canvas
-			editCanvas.SetActive(true);
-			Helper.TreeEnableRenderer(editCanvas);
+			if(!editCanvas.activeSelf) {
+				editCanvas.SetActive(true);
+				Helper.TreeEnableRenderer(editCanvas);
+			}
+		}
+	}
+
+	void LateUpdate() {
+		if(IsGrowAnimationDone && editCanvas.activeSelf) {
+			// get flower size, scaled
+			BoxCollider flowerCollider = flowerBox.GetComponent<BoxCollider>();
+			Bounds flowerBound = flowerCollider.bounds;
+			Vector3 flowerScale = flowerBox.transform.localScale;
+			float flowerSize = flowerScale.x * flowerBound.size.x;
+
+			// update edit canvas position
+			PlaceholderResizer pr = gameObject.GetComponent<PlaceholderResizer>();
+			float length = pr.length;
+			RectTransform editTransform = editCanvas.GetComponent<RectTransform>();
+			editCanvas.transform.localPosition = new Vector3(Math.Max(length, flowerSize) / 2 + editTransform.rect.width / 2 + 0.05f, 
+				editTransform.rect.height / 2, 0);
 		}
 	}
 
