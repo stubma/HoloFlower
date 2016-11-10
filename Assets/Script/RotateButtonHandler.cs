@@ -12,11 +12,11 @@ public class RotateButtonHandler : MonoBehaviour {
 	void OnSelect() {
 		// get flower controller
 		MainController mc = Camera.main.GetComponent<MainController>();
-		SBPlaceholderController gc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
-		FlowerController fc = gc.flowerBox.GetComponent<FlowerController>();
+		SBController sbc = mc.surfaceBookPlaceholder.GetComponent<SBController>();
+		FlowerController fc = sbc.flowerBox.GetComponent<FlowerController>();
 
 		// calculate start and end rotation
-		Quaternion startRotation = gc.flowerBox.transform.localRotation;
+		Quaternion startRotation = sbc.flowerBox.transform.localRotation;
 		Quaternion endRotation = startRotation * Quaternion.AngleAxis(angle, axis);
 
 		// call flower controller method

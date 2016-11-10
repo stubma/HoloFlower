@@ -88,8 +88,8 @@ public class MainController : MonoBehaviour {
 					pc.FadeOutBody();
 
 					// enable grow button
-					SBPlaceholderController gc = surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
-					gc.EnableGrowButton();
+					SBController sbc = surfaceBookPlaceholder.GetComponent<SBController>();
+					sbc.EnableGrowButton();
 
 					// hide locate panel
 					locatePanel.gameObject.SetActive(false);

@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System;
 
-public class SBPlaceholderController : MonoBehaviour {
+public class SBController : MonoBehaviour {
 	[Tooltip("Flower container to hold flower animation and set custom scale anchor")]
 	public GameObject flowerBox;
 

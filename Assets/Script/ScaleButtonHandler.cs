@@ -9,11 +9,11 @@ public class ScaleButtonHandler : MonoBehaviour {
 	void OnSelect() {
 		// get flower controller
 		MainController mc = Camera.main.GetComponent<MainController>();
-		SBPlaceholderController sbpc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
-		FlowerController fc = sbpc.flowerBox.GetComponent<FlowerController>();
+		SBController sbc = mc.surfaceBookPlaceholder.GetComponent<SBController>();
+		FlowerController fc = sbc.flowerBox.GetComponent<FlowerController>();
 
 		// calculate start and end scale
-		Vector3 startScale = sbpc.flowerBox.transform.localScale;
+		Vector3 startScale = sbc.flowerBox.transform.localScale;
 		Vector3 endScale = startScale * percent;
 
 		// call flower controller method
