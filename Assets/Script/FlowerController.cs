@@ -116,4 +116,11 @@ public class FlowerController : MonoBehaviour {
 			IsGrowed = true;
 		}
 	}
+
+	public void ChangeColor(Color c) {
+		MeshRenderer[] rList = gameObject.GetComponentsInChildren<MeshRenderer>();
+		foreach(MeshRenderer r in rList) {
+			r.material.color = c;
+		}
+	}
 }
