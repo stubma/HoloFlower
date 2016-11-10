@@ -2,35 +2,41 @@
 using System.Collections;
 using System;
 
-public class ScaleDownButtonHandler : MonoBehaviour {
+public class RotateButtonHandler : MonoBehaviour {
+	[Tooltip("Rotation axis")]
+	public Vector3 axis;
+
+	[Tooltip("Rotation angle in degree")]
+	public float angle;
+
 	// busy flag
-	private bool isScaling = false;
+	private bool isRotating = false;
 	private float duration = 0.2f;
 	private float time = 0;
-	private Vector3 startScale;
-	private Vector3 endScale;
+	private Quaternion startRotation;
+	private Quaternion endRotation;
 
 	void OnSelect() {
 		MainController mc = Camera.main.GetComponent<MainController>();
 		GrowController gc = mc.surfaceBookPlaceholder.GetComponent<GrowController>();
 		if(!gc.IsEditing) {
-			isScaling = true;
+			startRotation = gc.flowerBox.transform.localRotation;
+			endRotation = startRotation * Quaternion.AngleAxis(angle, axis);
+			isRotating = true;
 			gc.IsEditing = true;
-			startScale = gc.flowerBox.transform.localScale;
-			endScale = startScale * 0.9f;
 			time = 0;
 		}
 	}
 
 	void Update() {
-		if(isScaling) {
+		if(isRotating) {
 			time += Time.deltaTime;
 			float t = Math.Min(1, time / duration);
 			MainController mc = Camera.main.GetComponent<MainController>();
 			GrowController gc = mc.surfaceBookPlaceholder.GetComponent<GrowController>();
-			gc.flowerBox.transform.localScale = Vector3.Lerp(startScale, endScale, t);
+			gc.flowerBox.transform.localRotation = Quaternion.Lerp(startRotation, endRotation, t);
 			if(t >= 1) {
-				isScaling = false;
+				isRotating = false;
 				gc.IsEditing = false;
 			}
 		}
