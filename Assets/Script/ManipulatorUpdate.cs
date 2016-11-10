@@ -11,15 +11,16 @@ public class ManipulatorUpdate : MonoBehaviour {
 				// set target as manipulator's parent
 				gameObject.transform.parent = TargetManager.Instance.Target.transform;
 
-				// get grow controller
+				// get flower controller
 				MainController mc = Camera.main.GetComponent<MainController>();
-				GrowController gc = mc.surfaceBookPlaceholder.GetComponent<GrowController>();
+				SBPlaceholderController gc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
+				FlowerController fc = gc.flowerBox.GetComponent<FlowerController>();
 
 				// set manipulator position
-				gameObject.transform.localPosition = new Vector3(0, gc.FlowerBound.size.y / 2, 0);
+				gameObject.transform.localPosition = new Vector3(0, fc.FlowerBound.size.y / 2, 0);
 
 				// scale by target bound
-				gameObject.transform.localScale = gc.FlowerBound.size;
+				gameObject.transform.localScale = fc.FlowerBound.size;
 
 				// set flag
 				isManipulatorPlaced = true;

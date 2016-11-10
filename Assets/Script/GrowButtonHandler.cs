@@ -6,7 +6,7 @@ public class GrowButtonHandler : MonoBehaviour {
 		// grow the flower
 		MainController mc = Camera.main.GetComponent<MainController>();
 		GameObject sb = mc.surfaceBookPlaceholder;
-		GrowController gc = sb.GetComponent<GrowController>();
+		SBPlaceholderController gc = sb.GetComponent<SBPlaceholderController>();
 		gc.GrowFlower();
 
 		// hide button

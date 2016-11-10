@@ -3,10 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System;
 
-public class GrowController : MonoBehaviour {
-	[Tooltip("Flower object")]
-	public GameObject flower;
-
+public class SBPlaceholderController : MonoBehaviour {
 	[Tooltip("Flower container to hold flower animation and set custom scale anchor")]
 	public GameObject flowerBox;
 
@@ -16,33 +13,13 @@ public class GrowController : MonoBehaviour {
 	[Tooltip("Canvas which holds edit buttons for flower")]
 	public GameObject editCanvas;
 
+	[Tooltip("Canvas on which user select color for flower")]
+	public GameObject colorCanvas;
+
 	// flag indicating flower editing is ongoing or not
 	public bool IsEditing {
 		get;
 		set;
-	}
-
-	// flower bound
-	private Bounds flowerBound;
-	public Bounds FlowerBound {
-		get {
-			return flowerBound;
-		}
-	}
-
-	// is flower growed
-	public bool IsGrowed {
-		get {
-			return flowerBox.activeSelf;
-		}
-	}
-
-	// is flower grow animation finished
-	private bool IsGrowAnimationDone {
-		get {
-			Animation anim = flower.GetComponent<Animation>();
-			return !anim.isPlaying && IsGrowed;
-		}
 	}
 
 	// Use this for initialization
@@ -61,14 +38,9 @@ public class GrowController : MonoBehaviour {
 		growCollider.enabled = false;
 		growButton.SetActive(false);
 
-		// hide edit canvas
+		// hide something
 		editCanvas.SetActive(false);
-
-		// get flower bounds
-		// remove collider after get bounds, we don't need collision on flower
-		BoxCollider flowerCollider = flowerBox.GetComponent<BoxCollider>();
-		flowerBound = flowerCollider.bounds;
-		Destroy(flowerCollider);
+		colorCanvas.SetActive(false);
 
 		// hide flower
 		flowerBox.SetActive(false);
@@ -76,7 +48,8 @@ public class GrowController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(IsGrowAnimationDone) {
+		FlowerController fc = flowerBox.GetComponent<FlowerController>();
+		if(fc.IsGrowAnimationDone) {
 			// make flower target if grow animation is done
 			TargetManager.Instance.Target = flowerBox;
 
@@ -85,40 +58,48 @@ public class GrowController : MonoBehaviour {
 				editCanvas.SetActive(true);
 				Helper.TreeEnableRenderer(editCanvas);
 			}
+
+			// show color canvas
+			if(!colorCanvas.activeSelf) {
+				colorCanvas.SetActive(true);
+				Helper.TreeEnableRenderer(colorCanvas);
+			}
 		}
 	}
 
 	void LateUpdate() {
-		if(IsGrowAnimationDone && editCanvas.activeSelf) {
+		FlowerController fc = flowerBox.GetComponent<FlowerController>();
+		if(fc.IsGrowAnimationDone) {
 			// get flower size, scaled
 			// multiply with sqrt 2 for 45 degree situation
 			Vector3 flowerScale = flowerBox.transform.localScale;
-			float flowerSize = flowerScale.x * flowerBound.size.x;
+			float flowerSize = flowerScale.x * fc.FlowerBound.size.x;
 			flowerSize *= (float)Math.Sqrt(2);
 
-			// update edit canvas position
+			// get placeholder length
 			PlaceholderResizer pr = gameObject.GetComponent<PlaceholderResizer>();
 			float length = pr.length;
-			RectTransform editTransform = editCanvas.GetComponent<RectTransform>();
-			editCanvas.transform.localPosition = new Vector3(Math.Max(length, flowerSize) / 2 + editTransform.rect.width / 2 + 0.05f, 
-				editTransform.rect.height / 2, 0);
+
+			// update edit canvas position
+			if(editCanvas.activeSelf) {
+				RectTransform tf = editCanvas.GetComponent<RectTransform>();
+				editCanvas.transform.localPosition = new Vector3(Math.Max(length, flowerSize) / 2 + tf.rect.width / 2 + 0.05f, 
+					tf.rect.height / 2, 0);
+			}
+
+			// update color canvas position
+			if(colorCanvas.activeSelf) {
+				RectTransform tf = colorCanvas.GetComponent<RectTransform>();
+				colorCanvas.transform.localPosition = new Vector3(-Math.Max(length, flowerSize) / 2 - tf.rect.width / 2 - 0.05f, 
+					tf.rect.height / 2, 0);
+			}
 		}
 	}
 
 	public void GrowFlower() {
-		if(!IsGrowed) {
-			// place flower on it
-			flowerBox.SetActive(true);
-			flowerBox.transform.localRotation = gameObject.transform.localRotation;
-			Vector3 pos = gameObject.transform.position;
-			BoxCollider c = gameObject.GetComponent<BoxCollider>();
-			pos.y += c.bounds.extents.y;
-			flowerBox.transform.position = pos;
-
-			// play grow animation
-			Animation anim = flower.GetComponent<Animation>();
-			anim.Play("Take 001");
-		}
+		flowerBox.SetActive(true);
+		FlowerController fc = flowerBox.GetComponent<FlowerController>();
+		fc.Grow();
 	}
 
 	public void EnableGrowButton() {

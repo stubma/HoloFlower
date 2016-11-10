@@ -15,7 +15,7 @@ public class ScaleButtonHandler : MonoBehaviour {
 
 	void OnSelect() {
 		MainController mc = Camera.main.GetComponent<MainController>();
-		GrowController gc = mc.surfaceBookPlaceholder.GetComponent<GrowController>();
+		SBPlaceholderController gc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
 		if(!gc.IsEditing) {
 			isScaling = true;
 			gc.IsEditing = true;
@@ -30,7 +30,7 @@ public class ScaleButtonHandler : MonoBehaviour {
 			time += Time.deltaTime;
 			float t = Math.Min(1, time / duration);
 			MainController mc = Camera.main.GetComponent<MainController>();
-			GrowController gc = mc.surfaceBookPlaceholder.GetComponent<GrowController>();
+			SBPlaceholderController gc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
 			gc.flowerBox.transform.localScale = Vector3.Lerp(startScale, endScale, t);
 			if(t >= 1) {
 				isScaling = false;

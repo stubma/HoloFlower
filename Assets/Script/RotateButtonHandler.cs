@@ -18,7 +18,7 @@ public class RotateButtonHandler : MonoBehaviour {
 
 	void OnSelect() {
 		MainController mc = Camera.main.GetComponent<MainController>();
-		GrowController gc = mc.surfaceBookPlaceholder.GetComponent<GrowController>();
+		SBPlaceholderController gc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
 		if(!gc.IsEditing) {
 			startRotation = gc.flowerBox.transform.localRotation;
 			endRotation = startRotation * Quaternion.AngleAxis(angle, axis);
@@ -33,7 +33,7 @@ public class RotateButtonHandler : MonoBehaviour {
 			time += Time.deltaTime;
 			float t = Math.Min(1, time / duration);
 			MainController mc = Camera.main.GetComponent<MainController>();
-			GrowController gc = mc.surfaceBookPlaceholder.GetComponent<GrowController>();
+			SBPlaceholderController gc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
 			gc.flowerBox.transform.localRotation = Quaternion.Lerp(startRotation, endRotation, t);
 			if(t >= 1) {
 				isRotating = false;
