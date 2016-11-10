@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class FlowerController : MonoBehaviour {
 	[Tooltip("Flower object")]
@@ -27,6 +28,20 @@ public class FlowerController : MonoBehaviour {
 		set;
 	}
 
+	// for rotation
+	private bool isRotating = false;
+	private float rotateDuration = 0.2f;
+	private float rotateTime = 0;
+	private Quaternion startRotation;
+	private Quaternion endRotation;
+
+	// for scale
+	private bool isScaling = false;
+	private float scaleDuration = 0.2f;
+	private float scaleTime = 0;
+	private Vector3 startScale;
+	private Vector3 endScale;
+
 	void Start () {
 		// init
 		IsGrowed = false;
@@ -39,7 +54,45 @@ public class FlowerController : MonoBehaviour {
 	}
 
 	void Update () {
-	
+		// rotate
+		if(isRotating) {
+			rotateTime += Time.deltaTime;
+			float t = Math.Min(1, rotateTime / rotateDuration);
+			gameObject.transform.localRotation = Quaternion.Lerp(startRotation, endRotation, t);
+			if(t >= 1) {
+				isRotating = false;
+			}
+		}
+
+		// scale
+		if(isScaling) {
+			scaleTime += Time.deltaTime;
+			float t = Math.Min(1, scaleTime / scaleDuration);
+			gameObject.transform.localScale = Vector3.Lerp(startScale, endScale, t);
+			if(t >= 1) {
+				isScaling = false;
+			}
+		}
+	}
+
+	public void Rotate(Quaternion start, Quaternion end, float duration = 0.2f) {
+		if(!isRotating) {
+			startRotation = start;
+			endRotation = end;
+			rotateDuration = duration;
+			rotateTime = 0;
+			isRotating = true;
+		}
+	}
+
+	public void Scale(Vector3 start, Vector3 end, float duration = 0.2f) {
+		if(!isScaling) {
+			startScale = start;
+			endScale = end;
+			scaleTime = duration;
+			scaleTime = 0;
+			isScaling = true;
+		}
 	}
 
 	public void Grow() {

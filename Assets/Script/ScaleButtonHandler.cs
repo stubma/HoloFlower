@@ -6,36 +6,17 @@ public class ScaleButtonHandler : MonoBehaviour {
 	[Tooltip("Scale percent")]
 	public float percent;
 
-	// busy flag
-	private bool isScaling = false;
-	private float duration = 0.2f;
-	private float time = 0;
-	private Vector3 startScale;
-	private Vector3 endScale;
-
 	void OnSelect() {
+		// get flower controller
 		MainController mc = Camera.main.GetComponent<MainController>();
-		SBPlaceholderController gc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
-		if(!gc.IsEditing) {
-			isScaling = true;
-			gc.IsEditing = true;
-			startScale = gc.flowerBox.transform.localScale;
-			endScale = startScale * percent;
-			time = 0;
-		}
-	}
+		SBPlaceholderController sbpc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
+		FlowerController fc = sbpc.flowerBox.GetComponent<FlowerController>();
 
-	void Update() {
-		if(isScaling) {
-			time += Time.deltaTime;
-			float t = Math.Min(1, time / duration);
-			MainController mc = Camera.main.GetComponent<MainController>();
-			SBPlaceholderController gc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
-			gc.flowerBox.transform.localScale = Vector3.Lerp(startScale, endScale, t);
-			if(t >= 1) {
-				isScaling = false;
-				gc.IsEditing = false;
-			}
-		}
+		// calculate start and end scale
+		Vector3 startScale = sbpc.flowerBox.transform.localScale;
+		Vector3 endScale = startScale * percent;
+
+		// call flower controller method
+		fc.Scale(startScale, endScale);
 	}
 }

@@ -9,36 +9,17 @@ public class RotateButtonHandler : MonoBehaviour {
 	[Tooltip("Rotation angle in degree")]
 	public float angle;
 
-	// busy flag
-	private bool isRotating = false;
-	private float duration = 0.2f;
-	private float time = 0;
-	private Quaternion startRotation;
-	private Quaternion endRotation;
-
 	void OnSelect() {
+		// get flower controller
 		MainController mc = Camera.main.GetComponent<MainController>();
 		SBPlaceholderController gc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
-		if(!gc.IsEditing) {
-			startRotation = gc.flowerBox.transform.localRotation;
-			endRotation = startRotation * Quaternion.AngleAxis(angle, axis);
-			isRotating = true;
-			gc.IsEditing = true;
-			time = 0;
-		}
-	}
+		FlowerController fc = gc.flowerBox.GetComponent<FlowerController>();
 
-	void Update() {
-		if(isRotating) {
-			time += Time.deltaTime;
-			float t = Math.Min(1, time / duration);
-			MainController mc = Camera.main.GetComponent<MainController>();
-			SBPlaceholderController gc = mc.surfaceBookPlaceholder.GetComponent<SBPlaceholderController>();
-			gc.flowerBox.transform.localRotation = Quaternion.Lerp(startRotation, endRotation, t);
-			if(t >= 1) {
-				isRotating = false;
-				gc.IsEditing = false;
-			}
-		}
+		// calculate start and end rotation
+		Quaternion startRotation = gc.flowerBox.transform.localRotation;
+		Quaternion endRotation = startRotation * Quaternion.AngleAxis(angle, axis);
+
+		// call flower controller method
+		fc.Rotate(startRotation, endRotation);
 	}
 }

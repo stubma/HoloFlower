@@ -16,17 +16,8 @@ public class SBPlaceholderController : MonoBehaviour {
 	[Tooltip("Canvas on which user select color for flower")]
 	public GameObject colorCanvas;
 
-	// flag indicating flower editing is ongoing or not
-	public bool IsEditing {
-		get;
-		set;
-	}
-
 	// Use this for initialization
 	void Start () {
-		// init
-		IsEditing = false;
-
 		// place and hide grow button
 		Collider growCollider = growButton.GetComponent<Collider>();
 		Bounds growBound = growCollider.bounds;
