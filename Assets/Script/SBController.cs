@@ -25,7 +25,7 @@ public class SBController : MonoBehaviour {
 		float length = pr.length;
 		float width = pr.width;
 		growButton.transform.localPosition = new Vector3(0, growBound.size.y / 2, width / 2 + growBound.size.z / 2 + 0.02f);
-		growButton.transform.localScale = new Vector3(length / growBound.size.x, 1, 1);
+		growButton.transform.localScale = new Vector3(length / growBound.size.x, length / growBound.size.x / 2, 1);
 		growCollider.enabled = false;
 		growButton.SetActive(false);
 
