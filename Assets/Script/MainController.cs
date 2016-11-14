@@ -27,6 +27,12 @@ public class MainController : MonoBehaviour {
 	/// </summary>
 	private OpState state;
 
+	// is surface located
+	private bool isSBLocated = false;
+
+	// is neobox located
+	private bool isNeoboxLocated = false;
+
 	void Start () {
 		// place locate panel before user
 		float locatePanelDistance = locatePanel.transform.position.magnitude; 
@@ -38,68 +44,108 @@ public class MainController : MonoBehaviour {
 		Helper.TreeDisableRenderer(neoboxPlaceholder);
 		Helper.TreeDisableRenderer(surfaceBookPlaceholder);
 
+		// add delegate
+		{
+			TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
+			ttp.PlacingStart += MainController_onPlacingStart;
+			ttp.PlacingEnd += MainController_onPlacingEnd;
+		}
+		{
+			TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
+			ttp.PlacingStart += MainController_onPlacingStart;
+			ttp.PlacingEnd += MainController_onPlacingEnd;
+		}
+
 		// init state
 		SetState(OpState.IDLE);
 	}
 
 	public void StartLocateSurfaceBook() {
 		if(state != OpState.LOCATE_SURFACE_BOOK) {
+			// change state
 			SetState(OpState.LOCATE_SURFACE_BOOK);
+
+			// start to place
 			Helper.TreeEnableRenderer(surfaceBookPlaceholder);
 			TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
-			ttp.PlacingEnd += MainController_onPlacingEnd;
 			ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
 		}
 	}
 
 	public void StartLocateNeobox() {
 		if(state != OpState.LOCATE_NEOBOX) {
+			// change state
 			SetState(OpState.LOCATE_NEOBOX);
+
+			// start to place
 			Helper.TreeEnableRenderer(neoboxPlaceholder);
 			TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
-			ttp.PlacingEnd += MainController_onPlacingEnd;
 			ttp.SendMessage("OnSelect", SendMessageOptions.DontRequireReceiver);
 		}
 	}
 
+	private void MainController_onPlacingStart(GameObject target) {
+		// reset something when placing starts
+		if(target == surfaceBookPlaceholder) {
+			SetState(OpState.LOCATE_SURFACE_BOOK);
+			isSBLocated = false;
+			PlaceholderController pc = surfaceBookPlaceholder.GetComponent<PlaceholderController>();
+			pc.ResetBody();
+		} else if(target == neoboxPlaceholder) {
+			SetState(OpState.LOCATE_NEOBOX);
+			isNeoboxLocated = false;
+			PlaceholderController pc = neoboxPlaceholder.GetComponent<PlaceholderController>();
+			pc.ResetBody();
+		}
+	}
+
 	private void MainController_onPlacingEnd() {
-		lock(this) {
-			switch(state) {
-			case OpState.LOCATE_SURFACE_BOOK:
-				{
-					// remove TapToPlace to disable placing function
-					TapToPlace ttp = surfaceBookPlaceholder.GetComponent<TapToPlace>();
-					Destroy(ttp);
+		// place
+		switch(state) {
+		case OpState.LOCATE_SURFACE_BOOK:
+			{
+				// fade out body
+				PlaceholderController pc = surfaceBookPlaceholder.GetComponent<PlaceholderController>();
+				pc.FadeOutBody();
 
-					// fade out body
-					PlaceholderController pc = surfaceBookPlaceholder.GetComponent<PlaceholderController>();
-					pc.FadeOutBody();
+				// flag
+				isSBLocated = true;
 
-					break;
-				}
-			case OpState.LOCATE_NEOBOX:
-				{
-					// remove TapToPlace to disable placing function
-					TapToPlace ttp = neoboxPlaceholder.GetComponent<TapToPlace>();
-					Destroy(ttp);
+				// to idle state
+				SetState(OpState.IDLE);
 
-					// fade out body
-					PlaceholderController pc = neoboxPlaceholder.GetComponent<PlaceholderController>();
-					pc.FadeOutBody();
-
-					// enable grow button
-					SBController sbc = surfaceBookPlaceholder.GetComponent<SBController>();
-					sbc.EnableGrowButton();
-
-					// hide locate panel
-					locatePanel.gameObject.SetActive(false);
-
-					// to idle state
-					SetState(OpState.IDLE);
-
-					break;
-				}
+				break;
 			}
+		case OpState.LOCATE_NEOBOX:
+			{
+				// fade out body
+				PlaceholderController pc = neoboxPlaceholder.GetComponent<PlaceholderController>();
+				pc.FadeOutBody();
+
+				// flag
+				isNeoboxLocated = true;
+
+				// to idle state
+				SetState(OpState.IDLE);
+
+				break;
+			}
+		}
+
+		// if end, hide locate panel
+		if(isSBLocated && isNeoboxLocated) {
+			// remove TapToPlace to disable placing function
+			Destroy(surfaceBookPlaceholder.GetComponent<TapToPlace>());
+
+			// remove TapToPlace to disable placing function
+			Destroy(neoboxPlaceholder.GetComponent<TapToPlace>());
+
+			// enable grow button
+			SBController sbc = surfaceBookPlaceholder.GetComponent<SBController>();
+			sbc.EnableGrowButton();
+
+			// hide locate panel
+			locatePanel.gameObject.SetActive(false);
 		}
 	}
 

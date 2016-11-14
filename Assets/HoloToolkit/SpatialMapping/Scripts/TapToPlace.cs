@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace HoloToolkit.Unity
 {
@@ -37,11 +38,11 @@ namespace HoloToolkit.Unity
         /// </summary>
         private bool placing;
 
-		// event handler
-		public delegate void EventHandler();
-
 		// placing end event
-		public event EventHandler PlacingEnd;
+		public event UnityAction PlacingEnd;
+
+		// placing start event
+		public event UnityAction<GameObject> PlacingStart;
 
         private void Start()
         {
@@ -83,6 +84,11 @@ namespace HoloToolkit.Unity
                 Debug.Log(gameObject.name + " : Removing existing world anchor if any.");
 
                 anchorManager.RemoveAnchor(gameObject);
+
+				// delegate
+				if(PlacingStart != null) {
+					PlacingStart.Invoke(gameObject);
+				}
             }
             // If the user is not in placing mode, hide the spatial mapping mesh.
             else

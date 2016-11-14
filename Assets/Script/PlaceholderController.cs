@@ -13,6 +13,14 @@ public class PlaceholderController : MonoBehaviour {
 	private Color endColor;
 	private float startTime = 0;
 
+	// color backup of body
+	private Color bodyColor;
+
+	void Start() {
+		// save body color
+		bodyColor = body.GetComponent<Renderer>().material.color;
+	}
+
 	void Update() {
 		// fade out body if flag is set
 		if(isFadingOutBody) {
@@ -30,7 +38,16 @@ public class PlaceholderController : MonoBehaviour {
 	/// </summary>
 	public void FadeOutBody() {
 		isFadingOutBody = true;
+		startTime = 0;
 		startColor = body.GetComponent<Renderer>().material.color;
 		endColor = new Color(startColor.r, startColor.g, startColor.b, 0);
+	}
+
+	/// <summary>
+	/// restore body color
+	/// </summary>
+	public void ResetBody() {
+		isFadingOutBody = false;
+		body.GetComponent<Renderer>().material.color = bodyColor;
 	}
 }
