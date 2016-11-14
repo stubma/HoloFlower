@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.IO;
 
 #if !UNITY_EDITOR
 using System.Net.Http;
@@ -211,7 +212,7 @@ public class NeoboxController : MonoBehaviour {
     async static Task<string> Print(string json)
     {
         Debug.Log(json);
-        string url = "http://" + PrinterDetector.address + ":8080/print/printer/print";
+        string url = "http://" + PrinterDetector.Instance.address + ":8080/print/printer/print";
         Debug.Log(url);
 
         //*
