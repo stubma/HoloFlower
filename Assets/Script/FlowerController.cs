@@ -17,16 +17,13 @@ public class FlowerController : MonoBehaviour {
 	// is flower grow animation finished
 	public bool IsGrowAnimationDone {
 		get {
-			Animation anim = flower.GetComponent<Animation>();
-			return !anim.isPlaying && IsGrowed;
+			return !isGrowing && isGrowed;
 		}
 	}
 
 	// is flower growed
-	public bool IsGrowed {
-		get;
-		set;
-	}
+	private bool isGrowed = false;
+	private bool isGrowing = false;
 
 	// for rotation
 	private bool isRotating = false;
@@ -42,10 +39,7 @@ public class FlowerController : MonoBehaviour {
 	private Vector3 startScale;
 	private Vector3 endScale;
 
-	void Start () {
-		// init
-		IsGrowed = false;
-
+	void Start() {
 		// get flower bounds
 		// remove collider after get bounds, we don't need collision on flower
 		BoxCollider flowerCollider = gameObject.GetComponent<BoxCollider>();
@@ -71,6 +65,8 @@ public class FlowerController : MonoBehaviour {
 			gameObject.transform.localScale = Vector3.Lerp(startScale, endScale, t);
 			if(t >= 1) {
 				isScaling = false;
+				isGrowed = true;
+				isGrowing = false;
 			}
 		}
 	}
@@ -96,7 +92,7 @@ public class FlowerController : MonoBehaviour {
 	}
 
 	public void Grow() {
-		if(!IsGrowed) {
+		if(!isGrowed && !isGrowing) {
 			// get placeholder
 			MainController mc = Camera.main.GetComponent<MainController>();
 			GameObject placeholder = mc.surfaceBookPlaceholder;
@@ -108,12 +104,11 @@ public class FlowerController : MonoBehaviour {
 			pos.y += c.bounds.extents.y;
 			gameObject.transform.position = pos;
 
-			// play grow animation
-			Animation anim = flower.GetComponent<Animation>();
-			anim.Play("Take 001");
+			// play scale animation
+			Scale(Vector3.zero, Vector3.one, 0.5f);
 
 			// set flag
-			IsGrowed = true;
+			isGrowing = true;
 		}
 	}
 
