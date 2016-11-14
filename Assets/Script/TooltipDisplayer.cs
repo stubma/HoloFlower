@@ -22,7 +22,7 @@ public class TooltipDisplayer : MonoBehaviour {
 		// place tooltip above button
 		Bounds b = gameObject.GetComponent<Collider>().bounds;
 		Vector3 pos = Vector3.zero;
-		pos.y += b.size.y / 2;
+		pos.y += b.size.y / gameObject.transform.localScale.y / 2;
 		pos.y += tooltipText.GetComponent<RectTransform>().rect.height / 2 * tooltipText.transform.localScale.y;
 		pos.y += offsetY;
 		tooltipText.transform.localPosition = pos;
