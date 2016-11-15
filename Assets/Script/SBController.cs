@@ -18,14 +18,27 @@ public class SBController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		// place and hide grow button
-		Collider growCollider = growButton.GetComponent<Collider>();
-		Bounds growBound = growCollider.bounds;
+		// get placeholder size
 		PlaceholderResizer pr = gameObject.GetComponent<PlaceholderResizer>();
 		float length = pr.length;
 		float width = pr.width;
-		growButton.transform.localPosition = new Vector3(0, growBound.size.y / 2, width / 2 + growBound.size.z / 2 + 0.02f);
-		growButton.transform.localScale = new Vector3(length / growBound.size.x, length / growBound.size.x / 2, 1);
+
+		// get grow button bound
+		Collider growCollider = growButton.GetComponent<Collider>();
+		Bounds growBound = growCollider.bounds;
+
+		// calculate final scale and scaled button size
+		Vector3 curScale = growButton.transform.localScale;
+		float sideLen = growBound.size.x / curScale.x;
+		float sx = length / sideLen;
+		float sy = sx / 2;
+		float scaledVerticalSideLen = sideLen * sy;
+
+		// place grow button and set scale
+		growButton.transform.localPosition = new Vector3(0, scaledVerticalSideLen / 2, width / 2 + growBound.size.z / 2 + 0.02f);
+		growButton.transform.localScale = new Vector3(sx, sy, 1);
+
+		// disable grow button
 		growCollider.enabled = false;
 		growButton.SetActive(false);
 
