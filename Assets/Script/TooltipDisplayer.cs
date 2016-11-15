@@ -24,7 +24,7 @@ public class TooltipDisplayer : MonoBehaviour {
 		Vector3 pos = Vector3.zero;
 		pos.y += b.size.y / gameObject.transform.localScale.y / 2;
 		pos.y += tooltipText.GetComponent<RectTransform>().rect.height / 2 * tooltipText.transform.localScale.y;
-		pos.y += offsetY;
+		pos.y += offsetY / gameObject.transform.localScale.y;
 		tooltipText.transform.localPosition = pos;
 	}
 
