@@ -21,14 +21,36 @@ public class NeoboxController : MonoBehaviour {
 
 		// hide hint canvas
 		hintCanvas.SetActive(false);
+
+		// listen print animation event
+		MainController mc = Camera.main.GetComponent<MainController>();
+		SBController sbc = mc.surfaceBookPlaceholder.GetComponent<SBController>();
+		FlowerController fc = sbc.flowerBox.GetComponent<FlowerController>();
+		fc.PrintAnimationEnd += NeoboxController_PrintAnimationEnd;
+	}
+
+	void OnDestroy() {
+		// remove self from delegate list
+		MainController mc = Camera.main.GetComponent<MainController>();
+		SBController sbc = mc.surfaceBookPlaceholder.GetComponent<SBController>();
+		FlowerController fc = sbc.flowerBox.GetComponent<FlowerController>();
+		fc.PrintAnimationEnd -= NeoboxController_PrintAnimationEnd;
 	}
 
 	public void Print() {
+		// play start animation
+		MainController mc = Camera.main.GetComponent<MainController>();
+		SBController sbc = mc.surfaceBookPlaceholder.GetComponent<SBController>();
+		FlowerController fc = sbc.flowerBox.GetComponent<FlowerController>();
+		fc.PlayPrintAnimation();
+	}
+
+	private void NeoboxController_PrintAnimationEnd() {
 		// show hint canvas
 		hintCanvas.SetActive(true);
 
 		// send model to print
-		SendModel();
+		//SendModel();
 	}
 
 	private void SendModel() {

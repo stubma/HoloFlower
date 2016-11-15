@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using UnityEngine.Events;
 
 public class FlowerController : MonoBehaviour {
 	[Tooltip("Flower object")]
 	public GameObject flower;
+
+	// a clone flower used to play animation
+	private GameObject dupBox;
 
 	// flower bound
 	private Bounds flowerBound;
@@ -39,6 +43,16 @@ public class FlowerController : MonoBehaviour {
 	private Vector3 startScale;
 	private Vector3 endScale;
 
+	// for printing animation
+	private bool isPrinting = false;
+	private float printTime = 0;
+	private float printDuration = 0.25f;
+	private Color startColor;
+	private Color endColor;
+	private Vector3 startPrintScale;
+	private Vector3 endPrintScale;
+	public event UnityAction PrintAnimationEnd;
+
 	void Start() {
 		// get flower bounds
 		// remove collider after get bounds, we don't need collision on flower
@@ -67,6 +81,24 @@ public class FlowerController : MonoBehaviour {
 				isScaling = false;
 				isGrowed = true;
 				isGrowing = false;
+			}
+		}
+
+		// printing animation
+		if(isPrinting && dupBox) {
+			printTime += Time.deltaTime;
+			float t = Math.Min(1, printTime / printDuration);
+			dupBox.transform.localScale = Vector3.Lerp(startPrintScale, endPrintScale, t);
+			dupBox.GetComponentInChildren<Renderer>().material.color = Color.Lerp(startColor, endColor, t);
+			if(t >= 1) {
+				isPrinting = false;
+				Destroy(dupBox);
+				dupBox = null;
+
+				// delegate
+				if(PrintAnimationEnd != null) {
+					PrintAnimationEnd();
+				}
 			}
 		}
 	}
@@ -116,6 +148,31 @@ public class FlowerController : MonoBehaviour {
 		MeshRenderer[] rList = gameObject.GetComponentsInChildren<MeshRenderer>();
 		foreach(MeshRenderer r in rList) {
 			r.material.color = c;
+		}
+	}
+
+	public void PlayPrintAnimation() {
+		if(!isPrinting) {
+			// clone flower
+			dupBox = UnityEngine.Object.Instantiate(gameObject);
+			Destroy(dupBox.GetComponent<FlowerController>());
+			dupBox.transform.localRotation = Quaternion.identity;
+
+			// for tint
+			startColor = dupBox.GetComponentInChildren<Renderer>().material.color;
+			endColor = startColor;
+			endColor.a = 0;
+
+			// for scaling
+			startPrintScale = dupBox.transform.localScale;
+			endPrintScale = startPrintScale;
+			endPrintScale.x = 0;
+			endPrintScale.y *= 7;
+			endPrintScale.z = 0;
+
+			// set flag
+			isPrinting = true;
+			printTime = 0;
 		}
 	}
 }
