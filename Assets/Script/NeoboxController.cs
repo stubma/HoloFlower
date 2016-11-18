@@ -11,10 +11,7 @@ public class NeoboxController : MonoBehaviour {
 	[Tooltip("A hint canvas used to display hint message")]
 	public GameObject hintCanvas;
 
-	// custom log message
-	string message;
-
-	void Start () {
+	void Start() {
 		// place hint canvas
 		RectTransform tf = hintCanvas.GetComponent<RectTransform>();
 		hintCanvas.transform.localPosition = new Vector3(0, tf.rect.height / 2 + 0.01f, 0);
@@ -50,40 +47,42 @@ public class NeoboxController : MonoBehaviour {
 		hintCanvas.SetActive(true);
 
 		// send model to print
-		Debug.Log("before send model");
 		SendModel();
-		Debug.Log("after send model!!!");
 	}
 
 	private void SendModel() {
 #if !UNITY_EDITOR
 		string url = PrinterDetector.Instance.getUrl();
-        message = "Start upload to " + url;
-        UploadAndPrint(getContent(), url, getTransform());
+		UploadAndPrint(GetTargetSTL(), url, BuildPrintRequest());
 #endif
 	}
 
 #if !UNITY_EDITOR
     [System.Serializable]
-    public class DetectRespond
-    {
+    public class DetectRespond {
         public int mesh_id;
     }
 
     async void UploadAndPrint(byte[] data, string url, PrintRequest request) {
+		// upload model data, in stl format
         string respondString = await Upload(data, url);
         DetectRespond detectRespond = JsonUtility.FromJson<DetectRespond>(respondString);
-        message = respondString + " decode: " + detectRespond.mesh_id.ToString();
-        
-        // wait for a while to ensure the model is processed
+		
+		// log
+		Debug.Log("Model uploaded, mesh id is: " + detectRespond.mesh_id.ToString());
+
+        // wait for a while to ensure the model is uploaded, then send print request
+		// the print request should carry a mesh id which is returned from uploading
         await Task.Delay(3000);
         request.meshId = detectRespond.mesh_id;
         string json = JsonUtility.ToJson(request);
         string printRespond = await Print(json);
-        message = message + printRespond;
+		
+		// log
+		Debug.Log("Print ongoing: " + printRespond);
     }
 
-    async static Task<string> Upload(byte[] data, string url) {
+    async Task<string> Upload(byte[] data, string url) {
         using (var client = new HttpClient()) {
             using (var content = new MultipartFormDataContent("abcdefgabcdefgabcdefg")) {
 				content.Add(new StreamContent(new MemoryStream(data)), "file", "demo.stl");
@@ -95,13 +94,13 @@ public class NeoboxController : MonoBehaviour {
         }
     }
 
-    static byte[] getContent()
-    {
+	// get stl format for target to be printed
+	byte[] GetTargetSTL(){
 		// get test teddy data, in stl file
 		//TextAsset asset = Resources.Load("teddydata") as TextAsset;
 		//return asset.bytes;
 
-		// get hardcoded test data, stl format
+		// get hardcoded test data, stl format, it is a cube
         string c = "solid block100" +
             "   facet normal -1.000000e+000 0.000000e+000 0.000000e+000" +
             "      outer loop" +
@@ -191,35 +190,15 @@ public class NeoboxController : MonoBehaviour {
        return System.Text.Encoding.ASCII.GetBytes(c);
     }
 
-    IEnumerator sendModel(string url)
-    {
-        WWWForm form = new WWWForm();
-        form.AddBinaryData("file", getContent(), "filename.stl", "application/octet-stream");
-        WWW www = new WWW(url, form);
-        Debug.Log("upload");
-        yield return www;
-        if (www.error != null)
-        {
-            message = "Upload error " + www.error;
-            Debug.Log(message);
-        } else
-        {
-            message = "Uploaded";
-            Debug.Log(message);
-        }
-    }
-
     [System.Serializable]
-    public class PrintRequest
-    {
+    public class PrintRequest {
         public int meshId;
         public double scale;
         public double[] translation;
         public double[] orientation;
     }
 
-    private static PrintRequest getTransform()
-    {
+    private static PrintRequest BuildPrintRequest() {
         PrintRequest request = new PrintRequest();
         GameObject target = TargetManager.Instance.Target;
         request.scale = target.transform.localScale.x;
@@ -229,30 +208,22 @@ public class NeoboxController : MonoBehaviour {
         return request;
     }
 
-    // curl -d '{"meshId":1,"scale":0.2,"translation":[20,-50,0],"orientation":[0.6,0.8,0,0]}' http://192.168.1.116:8080/print/printer/print
-    async static Task<string> Print(string json)
-    {
-        Debug.Log(json);
+    async Task<string> Print(string json) {
+		// the print api entry url
+		// usage:
+		// curl -d '{"meshId":1,"scale":0.2,"translation":[20,-50,0],"orientation":[0.6,0.8,0,0]}' http://192.168.1.116:8080/print/printer/print
         string url = "http://" + PrinterDetector.Instance.address + ":8080/print/printer/print";
-        Debug.Log(url);
 
-        //*
-        using (var client = new HttpClient())
-        {
-            //client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            using (var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json"))
-            {
-                //Debug.Log(content.wr);
+		// send print request
+        using (var client = new HttpClient()) {
+            using (var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")) {
                 string myContent = await content.ReadAsStringAsync();
-                Debug.Log(myContent);
-                using (var message = await client.PostAsync(url, content))
-                {
+                using (var message = await client.PostAsync(url, content)){
                     var input = await message.Content.ReadAsStringAsync();
                     return input;
                 }
             }
         }
-        //*/
 
         /*
         //string jsonContent = "{\"color\":\"green\",\"message\":\"My first notification (yey)\",\"notify\":false,\"message_format\":\"text\"}";
