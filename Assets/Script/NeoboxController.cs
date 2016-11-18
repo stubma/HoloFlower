@@ -70,8 +70,7 @@ public class NeoboxController : MonoBehaviour {
         public int mesh_id;
     }
 
-    async void UploadAndPrint(byte[] data, string url, PrintRequest request)
-    {
+    async void UploadAndPrint(byte[] data, string url, PrintRequest request) {
         string respondString = await Upload(data, url);
         DetectRespond detectRespond = JsonUtility.FromJson<DetectRespond>(respondString);
         message = respondString + " decode: " + detectRespond.mesh_id.ToString();
@@ -84,18 +83,11 @@ public class NeoboxController : MonoBehaviour {
         message = message + printRespond;
     }
 
-    async static Task<string> Upload(byte[] data, string url)
-    {
-        using (var client = new HttpClient())
-        {
-            using (var content = new MultipartFormDataContent("abcdefgabcdefgabcdefg"))
-            {
-                TextAsset asset = Resources.Load("teddydata") as TextAsset;
-
-                content.Add(new StreamContent(new MemoryStream(asset.bytes)), "file", "teddy.stl");
-
-                using (var message = await client.PostAsync(url, content))
-                {
+    async static Task<string> Upload(byte[] data, string url) {
+        using (var client = new HttpClient()) {
+            using (var content = new MultipartFormDataContent("abcdefgabcdefgabcdefg")) {
+				content.Add(new StreamContent(new MemoryStream(data)), "file", "demo.stl");
+                using (var message = await client.PostAsync(url, content)) {
                     var input = await message.Content.ReadAsStringAsync();
                     return input;
                 }
@@ -105,6 +97,11 @@ public class NeoboxController : MonoBehaviour {
 
     static byte[] getContent()
     {
+		// get test teddy data, in stl file
+		//TextAsset asset = Resources.Load("teddydata") as TextAsset;
+		//return asset.bytes;
+
+		// get hardcoded test data, stl format
         string c = "solid block100" +
             "   facet normal -1.000000e+000 0.000000e+000 0.000000e+000" +
             "      outer loop" +
