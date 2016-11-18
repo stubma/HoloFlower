@@ -50,7 +50,9 @@ public class NeoboxController : MonoBehaviour {
 		hintCanvas.SetActive(true);
 
 		// send model to print
-		//SendModel();
+		Debug.Log("before send model");
+		SendModel();
+		Debug.Log("after send model!!!");
 	}
 
 	private void SendModel() {

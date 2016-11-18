@@ -84,7 +84,6 @@ public class PrinterDetector : Singleton<PrinterDetector> {
             {
                 if (localHostName.Type == HostNameType.Ipv4)
                 {
-                    //Debug.Log(localHostName);
                     return localHostName;
                 }
             }
@@ -94,19 +93,15 @@ public class PrinterDetector : Singleton<PrinterDetector> {
 
     async void MessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
     {
-        Debug.Log("received");
         Stream streamIn = args.GetDataStream().AsStreamForRead();
         StreamReader reader = new StreamReader(streamIn);
         message = await reader.ReadLineAsync();
 
-        
-        Debug.Log(args.RemoteAddress); // printer
-        Debug.Log(args.LocalAddress); // hololens
+		// log
+        Debug.Log("Neobox found at address: " + args.RemoteAddress); // printer
+        Debug.Log("Hololens local address : " + args.LocalAddress); // hololens
 
-        //sendModel(args.RemoteAddress.ToString());
         address = args.RemoteAddress.ToString();
-
-        Debug.Log(message);
     }
 
     private IPAddress GetBroadcastAddress(IPAddress address, IPAddress subnetMask)
