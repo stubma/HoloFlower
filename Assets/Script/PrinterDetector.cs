@@ -91,8 +91,6 @@ public class PrinterDetector : Singleton<PrinterDetector> {
         HostName remoteHostname = new HostName(broadCastIP.ToString());
         outputStream = await listenerSocket.GetOutputStreamAsync(remoteHostname, "59105");
 
-        Debug.Log(broadCastIP.ToString());
-
         using (DataWriter writer = new DataWriter(outputStream))
         {
             writer.WriteString("joiner v1");
