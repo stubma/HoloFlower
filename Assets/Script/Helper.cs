@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class Helper {
 	public static void TreeDisableRenderer(GameObject root) {
@@ -26,5 +27,9 @@ public class Helper {
 				r.enabled = true;
 			}
 		}
+	}
+
+	public static float d2r(float d) {
+		return (float)(d * Math.PI / 180);
 	}
 }

@@ -246,7 +246,10 @@ public class NeoboxController : MonoBehaviour {
         GameObject target = TargetManager.Instance.Target;
         request.scale = target.transform.localScale.x;
         request.translation = new double[] { target.transform.localPosition.x, target.transform.localPosition.y, target.transform.localPosition.z };
-        request.orientation = new double[] { target.transform.localRotation.x, target.transform.localRotation.y, target.transform.localRotation.z, target.transform.localRotation.w };
+		request.orientation = new double[] { Helper.d2r(target.transform.localRotation.eulerAngles.x), 
+			Helper.d2r(target.transform.localRotation.eulerAngles.y), 
+			Helper.d2r(target.transform.localRotation.eulerAngles.z),
+			0 };
         return request;
     }
 
