@@ -125,6 +125,7 @@ public class PrinterDetector : Singleton<PrinterDetector> {
 
 		// save printer address
         address = args.RemoteAddress.ToString();
+	address = "192.168.1.103";
     }
 
     private IPAddress GetBroadcastAddress(IPAddress address, IPAddress subnetMask)

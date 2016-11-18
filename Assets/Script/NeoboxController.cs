@@ -246,8 +246,7 @@ public class NeoboxController : MonoBehaviour {
         GameObject target = TargetManager.Instance.Target;
         request.scale = target.transform.localScale.x;
         request.translation = new double[] { target.transform.localPosition.x, target.transform.localPosition.y, target.transform.localPosition.z };
-        request.orientation = new double[] { target.transform.localRotation.w, target.transform.localRotation.x,
-            target.transform.localRotation.y, target.transform.localRotation.z };
+        request.orientation = new double[] { target.transform.localRotation.x, target.transform.localRotation.y, target.transform.localRotation.z, target.transform.localRotation.w };
         return request;
     }
 
@@ -267,23 +266,6 @@ public class NeoboxController : MonoBehaviour {
                 }
             }
         }
-
-        /*
-        //string jsonContent = "{\"color\":\"green\",\"message\":\"My first notification (yey)\",\"notify\":false,\"message_format\":\"text\"}";
-        byte[] jsonBytes = System.Text.Encoding.ASCII.GetBytes(json);
-        var request = (System.Net.HttpWebRequest)System.Net.WebRequest.Create("https://organization.hipchat.com/v2/room/2388080/notification?auth_token=authKeyHere");
-        request.ContentType = "application/json";
-        request.Method = "POST";
-        request.ContentLength = jsonBytes.Length;
-
-        using (var reqStream = request.GetRequestStream())
-        {
-            reqStream.Write(jsonBytes, 0, jsonBytes.Length);
-            reqStream.Close();
-        }
-
-        System.Net.WebResponse response = request.GetResponse();
-        */
     }
 
 #endif
