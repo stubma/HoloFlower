@@ -85,7 +85,7 @@ public class NeoboxController : MonoBehaviour {
     async Task<string> Upload(byte[] data, string url) {
         using (var client = new HttpClient()) {
             using (var content = new MultipartFormDataContent("abcdefgabcdefgabcdefg")) {
-				content.Add(new StreamContent(new MemoryStream(data)), "file", "demo.stl");
+				content.Add(new StreamContent(new MemoryStream(data)), "file", "flower.stl");
                 using (var message = await client.PostAsync(url, content)) {
                     var input = await message.Content.ReadAsStringAsync();
                     return input;
@@ -96,11 +96,12 @@ public class NeoboxController : MonoBehaviour {
 
 	// get stl format for target to be printed
 	byte[] GetTargetSTL(){
-		// get test teddy data, in stl file
-		//TextAsset asset = Resources.Load("teddydata") as TextAsset;
-		//return asset.bytes;
+		// get flower data, in stl file
+		TextAsset asset = Resources.Load("rose.stl") as TextAsset;
+		return asset.bytes;
 
 		// get hardcoded test data, stl format, it is a cube
+		/*
         string c = "solid block100" +
             "   facet normal -1.000000e+000 0.000000e+000 0.000000e+000" +
             "      outer loop" +
@@ -187,7 +188,8 @@ public class NeoboxController : MonoBehaviour {
             "      endloop" +
             "   endfacet" +
             "endsolid";
-       return System.Text.Encoding.ASCII.GetBytes(c);
+       	return System.Text.Encoding.ASCII.GetBytes(c);
+		*/
     }
 
     [System.Serializable]

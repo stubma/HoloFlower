@@ -34,12 +34,6 @@ public class MainController : MonoBehaviour {
 	private bool isNeoboxLocated = false;
 
 	void Start () {
-		// place locate panel before user
-		float locatePanelDistance = locatePanel.transform.position.magnitude; 
-		Vector3 dstPos = gameObject.transform.forward * locatePanelDistance;
-		locatePanel.transform.position = dstPos;
-		locatePanel.transform.localRotation = gameObject.transform.localRotation;
-
 		// hide something
 		Helper.TreeDisableRenderer(neoboxPlaceholder);
 		Helper.TreeDisableRenderer(surfaceBookPlaceholder);
@@ -58,6 +52,14 @@ public class MainController : MonoBehaviour {
 
 		// init state
 		SetState(OpState.IDLE);
+	}
+
+	void OnBecameVisible() {
+		// place locate panel before user
+		float locatePanelDistance = locatePanel.transform.position.magnitude; 
+		Vector3 dstPos = gameObject.transform.forward * locatePanelDistance;
+		locatePanel.transform.position = dstPos;
+		locatePanel.transform.localRotation = gameObject.transform.localRotation;
 	}
 
 	public void StartLocateSurfaceBook() {

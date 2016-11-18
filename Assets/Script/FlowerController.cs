@@ -85,19 +85,25 @@ public class FlowerController : MonoBehaviour {
 		}
 
 		// printing animation
-		if(isPrinting && dupBox) {
-			printTime += Time.deltaTime;
-			float t = Math.Min(1, printTime / printDuration);
-			dupBox.transform.localScale = Vector3.Lerp(startPrintScale, endPrintScale, t);
-			dupBox.GetComponentInChildren<Renderer>().material.color = Color.Lerp(startColor, endColor, t);
-			if(t >= 1) {
-				isPrinting = false;
-				Destroy(dupBox);
-				dupBox = null;
-
-				// delegate
-				if(PrintAnimationEnd != null) {
-					PrintAnimationEnd();
+		if(isPrinting) {
+			if(dupBox != null) {
+				printTime += Time.deltaTime;
+				float t = Math.Min(1, printTime / printDuration);
+				dupBox.transform.localScale = Vector3.Lerp(startPrintScale, endPrintScale, t);
+				dupBox.GetComponentInChildren<Renderer>().material.color = Color.Lerp(startColor, endColor, t);
+				if(t >= 1) {
+					Destroy(dupBox);
+					dupBox = null;
+					printTime = 0;
+				}
+			} else {
+				// wait for 0.2 second to avoid print animation stuck
+				printTime += Time.deltaTime;
+				if(printTime >= 0.2f) {
+					isPrinting = false;
+					if(PrintAnimationEnd != null) {
+						PrintAnimationEnd();
+					}
 				}
 			}
 		}
@@ -137,7 +143,7 @@ public class FlowerController : MonoBehaviour {
 			gameObject.transform.position = pos;
 
 			// play scale animation
-			Scale(Vector3.zero, Vector3.one, 0.5f);
+			Scale(Vector3.zero, Vector3.one, 1);
 
 			// set flag
 			isGrowing = true;
