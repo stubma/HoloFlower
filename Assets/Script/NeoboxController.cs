@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.IO;
+using UnityEngine.UI;
 
 #if !UNITY_EDITOR
 using System.Net.Http;
@@ -11,19 +12,59 @@ public class NeoboxController : MonoBehaviour {
 	[Tooltip("A hint canvas used to display hint message")]
 	public GameObject hintCanvas;
 
+	[Tooltip("A text to display more detail hint message")]
+	public Text hintText;
+
+	[Tooltip("A text to display hint title")]
+	public Text hintTitle;
+
+	// hint message string
+	private string hintMsg = "";
+	private int hintTitleDots = 0;
+	private float hintTitleTime = 0;
+
+	// is printing?
+	private bool isPrinting = false;
+
 	void Start() {
+		// init 
+		hintTitle.text = "";
+
 		// place hint canvas
 		RectTransform tf = hintCanvas.GetComponent<RectTransform>();
 		hintCanvas.transform.localPosition = new Vector3(0, tf.rect.height / 2 + 0.01f, 0);
-
-		// hide hint canvas
-		hintCanvas.SetActive(false);
 
 		// listen print animation event
 		MainController mc = Camera.main.GetComponent<MainController>();
 		SBController sbc = mc.surfaceBookPlaceholder.GetComponent<SBController>();
 		FlowerController fc = sbc.flowerBox.GetComponent<FlowerController>();
 		fc.PrintAnimationEnd += NeoboxController_PrintAnimationEnd;
+	}
+
+	void Update() {
+		// update hint message
+		// if no hint message, show printer ip if detected and located
+		hintText.text = hintMsg;
+		if(hintMsg.Length <= 0) {
+			MainController mc = Camera.main.GetComponent<MainController>();
+			if(mc.IsNeoboxLocated && PrinterDetector.Instance.IsDetectionSuccess) {
+				hintText.text = "printer detected: " + PrinterDetector.Instance.PrinterAddress;
+			}
+		}
+
+		// update hint title
+		if(isPrinting) {
+			hintTitleTime += Time.deltaTime;
+			if(hintTitleTime >= 1) {
+				hintTitle.text = "Printing";
+				for(int i = 0; i < hintTitleDots; i++) {
+					hintTitle.text += ".";
+				}
+				hintTitleDots++;
+				hintTitleDots %= 4;
+				hintTitleTime = 0;
+			}
+		}
 	}
 
 	void OnDestroy() {
@@ -43,17 +84,15 @@ public class NeoboxController : MonoBehaviour {
 	}
 
 	private void NeoboxController_PrintAnimationEnd() {
-		// show hint canvas
-		hintCanvas.SetActive(true);
-
 		// send model to print
+		isPrinting = true;
+		hintTitle.text = "Printing";
 		SendModel();
 	}
 
 	private void SendModel() {
 #if !UNITY_EDITOR
-		string url = PrinterDetector.Instance.getUrl();
-		UploadAndPrint(GetTargetSTL(), url, BuildPrintRequest());
+		UploadAndPrint(GetTargetSTL(), PrinterDetector.Instance.ModelUploadUrl, BuildPrintRequest());
 #endif
 	}
 
@@ -65,21 +104,23 @@ public class NeoboxController : MonoBehaviour {
 
     async void UploadAndPrint(byte[] data, string url, PrintRequest request) {
 		// upload model data, in stl format
+		hintMsg = "uploading model";
         string respondString = await Upload(data, url);
         DetectRespond detectRespond = JsonUtility.FromJson<DetectRespond>(respondString);
 		
 		// log
-		Debug.Log("Model uploaded, mesh id is: " + detectRespond.mesh_id.ToString());
+		hintMsg = "model uploaded, mesh id is: " + detectRespond.mesh_id.ToString();
 
         // wait for a while to ensure the model is uploaded, then send print request
 		// the print request should carry a mesh id which is returned from uploading
         await Task.Delay(3000);
         request.meshId = detectRespond.mesh_id;
         string json = JsonUtility.ToJson(request);
+		hintMsg = "sending print request";
         string printRespond = await Print(json);
 		
 		// log
-		Debug.Log("Print ongoing: " + printRespond);
+		hintMsg = "printing in progress";
     }
 
     async Task<string> Upload(byte[] data, string url) {
@@ -214,7 +255,7 @@ public class NeoboxController : MonoBehaviour {
 		// the print api entry url
 		// usage:
 		// curl -d '{"meshId":1,"scale":0.2,"translation":[20,-50,0],"orientation":[0.6,0.8,0,0]}' http://192.168.1.116:8080/print/printer/print
-        string url = "http://" + PrinterDetector.Instance.address + ":8080/print/printer/print";
+		string url = PrinterDetector.Instance.PrintUrl;
 
 		// send print request
         using (var client = new HttpClient()) {

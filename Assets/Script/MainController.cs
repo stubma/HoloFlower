@@ -28,10 +28,16 @@ public class MainController : MonoBehaviour {
 	private OpState state;
 
 	// is surface located
-	private bool isSBLocated = false;
+	public bool IsSBLocated {
+		get;
+		set;
+	}
 
 	// is neobox located
-	private bool isNeoboxLocated = false;
+	public bool IsNeoboxLocated {
+		get;
+		set;
+	}
 
 	void Start () {
 		// hide something
@@ -90,12 +96,12 @@ public class MainController : MonoBehaviour {
 		// reset something when placing starts
 		if(target == surfaceBookPlaceholder) {
 			SetState(OpState.LOCATE_SURFACE_BOOK);
-			isSBLocated = false;
+			IsSBLocated = false;
 			PlaceholderController pc = surfaceBookPlaceholder.GetComponent<PlaceholderController>();
 			pc.ResetBody();
 		} else if(target == neoboxPlaceholder) {
 			SetState(OpState.LOCATE_NEOBOX);
-			isNeoboxLocated = false;
+			IsNeoboxLocated = false;
 			PlaceholderController pc = neoboxPlaceholder.GetComponent<PlaceholderController>();
 			pc.ResetBody();
 		}
@@ -111,7 +117,7 @@ public class MainController : MonoBehaviour {
 				pc.FadeOutBody();
 
 				// flag
-				isSBLocated = true;
+				IsSBLocated = true;
 
 				// to idle state
 				SetState(OpState.IDLE);
@@ -125,7 +131,7 @@ public class MainController : MonoBehaviour {
 				pc.FadeOutBody();
 
 				// flag
-				isNeoboxLocated = true;
+				IsNeoboxLocated = true;
 
 				// to idle state
 				SetState(OpState.IDLE);
@@ -135,7 +141,7 @@ public class MainController : MonoBehaviour {
 		}
 
 		// if end, hide locate panel
-		if(isSBLocated && isNeoboxLocated) {
+		if(IsSBLocated && IsNeoboxLocated) {
 			// remove TapToPlace to disable placing function
 			Destroy(surfaceBookPlaceholder.GetComponent<TapToPlace>());
 

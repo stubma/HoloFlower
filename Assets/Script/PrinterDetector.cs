@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 public class PrinterDetector : Singleton<PrinterDetector> {
 	string message;
-	public string address = "192.168.0.105";
+	private string address = "";
 
 	// if false, the above address will be used, convenient for debugging
 	private bool enableDetection = true;
@@ -37,11 +37,35 @@ public class PrinterDetector : Singleton<PrinterDetector> {
 #endif
 	}
 
+	// is printer detected
+	public bool IsDetectionSuccess {
+		get {
+			return address.Length > 0;
+		}
+	}
+
+	// printer ip address
+	public string PrinterAddress {
+		get {
+			return address;
+		}
+	}
+
+	// url for upload stl model
+	public string ModelUploadUrl {
+		get {
+			return "http://" + address + ":8080/print/model";
+		}
+	}
+
+	// url for start print
+	public string PrintUrl {
+		get {
+			return "http://" + address + ":8080/print/printer/print";
+		}
+	}
+
 	#if !UNITY_EDITOR
-    public string getUrl()
-    {
-        return "http://" + address + ":8080/print/model";
-    }
 
     private async void Listen()
     {
@@ -101,6 +125,7 @@ public class PrinterDetector : Singleton<PrinterDetector> {
         Debug.Log("Neobox found at address: " + args.RemoteAddress); // printer
         Debug.Log("Hololens local address : " + args.LocalAddress); // hololens
 
+		// save printer address
         address = args.RemoteAddress.ToString();
     }
 
