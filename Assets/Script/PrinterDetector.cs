@@ -74,38 +74,38 @@ public class PrinterDetector : Singleton<PrinterDetector> {
         await listenerSocket.BindServiceNameAsync("59104");
     }
 
-    private async void Send()
-    {
-        IOutputStream outputStream;
+    private async void Send() {
+		// get local ip and null checking
         HostName localHostName = GetLocalIp();
-        if (localHostName == null)
-        {
+        if (localHostName == null) {
             return;
         }
+
+		// get local ip string and to IPAddress format
         byte? prefix = localHostName.IPInformation.PrefixLength;
         string localIPString = localHostName.ToString();
         IPAddress localIP = System.Net.IPAddress.Parse(localIPString);
+
+		// get broadcast address
         string subnetMaskString = "255.255.255.0"; // TODO: compute subnet mask
         IPAddress subnetIP = IPAddress.Parse(subnetMaskString);
         IPAddress broadCastIP = GetBroadcastAddress(localIP, subnetIP);
         HostName remoteHostname = new HostName(broadCastIP.ToString());
-        outputStream = await listenerSocket.GetOutputStreamAsync(remoteHostname, "59105");
 
-        using (DataWriter writer = new DataWriter(outputStream))
-        {
+		// create output
+		IOutputStream outputStream = await listenerSocket.GetOutputStreamAsync(remoteHostname, "59105");
+
+		// write command to printer
+        using (DataWriter writer = new DataWriter(outputStream)) {
             writer.WriteString("joiner v1");
             await writer.StoreAsync();
         }
     }
 
-    private HostName GetLocalIp()
-    {
-        foreach (HostName localHostName in NetworkInformation.GetHostNames())
-        {
-            if (localHostName != null && localHostName.IPInformation != null)
-            {
-                if (localHostName.Type == HostNameType.Ipv4)
-                {
+    private HostName GetLocalIp() {
+        foreach (HostName localHostName in NetworkInformation.GetHostNames()) {
+            if (localHostName != null && localHostName.IPInformation != null) {
+                if (localHostName.Type == HostNameType.Ipv4) {
                     return localHostName;
                 }
             }
