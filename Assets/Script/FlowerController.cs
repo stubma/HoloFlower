@@ -48,8 +48,9 @@ public class FlowerController : MonoBehaviour {
 
 	// for printing animation
 	private bool isPrinting = false;
+	private int printAnimPhase = 0;
 	private float printTime = 0;
-	private float printDuration = 0.25f;
+	private float printDuration = 1;
 	private Color startColor;
 	private Color endColor;
 	private Vector3 startPrintScale;
@@ -96,14 +97,10 @@ public class FlowerController : MonoBehaviour {
 		// printing animation
 		if(isPrinting) {
 			if(dupBox != null) {
-				printTime += Time.deltaTime;
-				float t = Math.Min(1, printTime / printDuration);
-				dupBox.transform.localScale = Vector3.Lerp(startPrintScale, endPrintScale, t);
-				dupBox.GetComponentInChildren<Renderer>().material.color = Color.Lerp(startColor, endColor, t);
-				if(t >= 1) {
-					Destroy(dupBox);
-					dupBox = null;
-					printTime = 0;
+				if(printAnimPhase == 0) {
+					PrintAnimationUpPhase();
+				} else if(printAnimPhase == 1) {
+					PrintAnimationDownPhase();
 				}
 			} else {
 				// wait for 0.2 second to avoid print animation stuck
@@ -115,6 +112,48 @@ public class FlowerController : MonoBehaviour {
 					}
 				}
 			}
+		}
+	}
+
+	private void PrintAnimationUpPhase() {
+		printTime += Time.deltaTime;
+		float t = Math.Min(1, printTime / printDuration);
+		dupBox.transform.localScale = Vector3.Lerp(startPrintScale, endPrintScale, t);
+		dupBox.GetComponentInChildren<Renderer>().material.color = Color.Lerp(startColor, endColor, t);
+		if(t >= 1) {
+			// now move dup box to print placeholder
+			MainController mc = Camera.main.GetComponent<MainController>();
+			GameObject placeholder = mc.neoboxPlaceholder;
+			dupBox.transform.localRotation = placeholder.transform.localRotation;
+			Vector3 pos = placeholder.transform.position;
+			BoxCollider c = placeholder.GetComponent<BoxCollider>();
+			pos.y += c.bounds.extents.y;
+			dupBox.transform.position = pos;
+
+			// scale back
+			startPrintScale = dupBox.transform.localScale;
+			endPrintScale = gameObject.transform.localScale;
+
+			// fade in, so swap colors
+			Color tmp = startColor;
+			startColor = endColor;
+			endColor = tmp;
+
+			// reset time and increase phase
+			printTime = 0;
+			printAnimPhase++;
+		}
+	}
+
+	private void PrintAnimationDownPhase() {
+		printTime += Time.deltaTime;
+		float t = Math.Min(1, printTime / printDuration);
+		dupBox.transform.localScale = Vector3.Lerp(startPrintScale, endPrintScale, t);
+		dupBox.GetComponentInChildren<Renderer>().material.color = Color.Lerp(startColor, endColor, t);
+		if(t >= 1) {
+			Destroy(dupBox);
+			dupBox = null;
+			printTime = 0;
 		}
 	}
 
@@ -196,6 +235,7 @@ public class FlowerController : MonoBehaviour {
 
 			// set flag
 			isPrinting = true;
+			printAnimPhase = 0;
 			printTime = 0;
 		}
 	}
