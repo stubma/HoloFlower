@@ -101,14 +101,14 @@ public class FlowerController : MonoBehaviour {
 					PrintAnimationUpPhase();
 				} else if(printAnimPhase == 1) {
 					PrintAnimationDownPhase();
-				}
-			} else {
-				// wait for 0.2 second to avoid print animation stuck
-				printTime += Time.deltaTime;
-				if(printTime >= 0.2f) {
-					isPrinting = false;
-					if(PrintAnimationEnd != null) {
-						PrintAnimationEnd();
+				} else if(printAnimPhase == 2) {
+					// wait for 0.2 second to avoid print animation stuck
+					printTime += Time.deltaTime;
+					if(printTime >= 0.2f) {
+						isPrinting = false;
+						if(PrintAnimationEnd != null) {
+							PrintAnimationEnd();
+						}
 					}
 				}
 			}
@@ -151,9 +151,8 @@ public class FlowerController : MonoBehaviour {
 		dupBox.transform.localScale = Vector3.Lerp(startPrintScale, endPrintScale, t);
 		dupBox.GetComponentInChildren<Renderer>().material.color = Color.Lerp(startColor, endColor, t);
 		if(t >= 1) {
-			Destroy(dupBox);
-			dupBox = null;
 			printTime = 0;
+			printAnimPhase++;
 		}
 	}
 
