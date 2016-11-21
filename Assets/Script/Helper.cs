@@ -28,8 +28,4 @@ public class Helper {
 			}
 		}
 	}
-
-	public static float d2r(float d) {
-		return (float)(d * Math.PI / 180);
-	}
 }

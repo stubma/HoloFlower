@@ -28,5 +28,9 @@ public class RotateButtonHandler : MonoBehaviour {
 
 		// call flower controller method
 		fc.Rotate(startRotation, endRotation);
+
+		// rotate fixed duplication also
+		// neobox uses right-hand coordinate
+		fc.RotateFixedDup(axis, -angle);
 	}
 }

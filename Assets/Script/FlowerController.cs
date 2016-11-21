@@ -10,6 +10,9 @@ public class FlowerController : MonoBehaviour {
 	// a clone flower used to play animation
 	private GameObject dupBox;
 
+	// a clone which is not rotated, to get correct final rotation for printing
+	private GameObject fixedDup;
+
 	// flower bound
 	private Bounds flowerBound;
 	public Bounds FlowerBound {
@@ -59,6 +62,12 @@ public class FlowerController : MonoBehaviour {
 		BoxCollider flowerCollider = gameObject.GetComponent<BoxCollider>();
 		flowerBound = flowerCollider.bounds;
 		Destroy(flowerCollider);
+
+		// duplicate without rotation
+		fixedDup = UnityEngine.Object.Instantiate(gameObject);
+		Destroy(fixedDup.GetComponent<FlowerController>());
+		Destroy(fixedDup.GetComponent<BoxCollider>());
+		Helper.TreeDisableRenderer(fixedDup);
 	}
 
 	void Update () {
@@ -127,6 +136,15 @@ public class FlowerController : MonoBehaviour {
 			scaleTime = 0;
 			isScaling = true;
 		}
+	}
+
+	public void RotateFixedDup(Vector3 axis, float angle) {
+		Quaternion r = fixedDup.transform.localRotation;
+		fixedDup.transform.localRotation = r * Quaternion.AngleAxis(angle, axis);
+	}
+
+	public Quaternion GetFixedDupRotation() {
+		return fixedDup.transform.localRotation;
 	}
 
 	public void Grow() {
