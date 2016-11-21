@@ -249,7 +249,6 @@ public class NeoboxController : MonoBehaviour {
         request.scale = target.transform.localScale.x;
         request.translation = new double[] { target.transform.localPosition.x, target.transform.localPosition.y, target.transform.localPosition.z };
 		request.orientation = new double[] { r.w, r.x, r.y, r.z };
-	Debug.Log("r is " + r.w + ", " + r.x + ", " + r.y + ", " + r.z);
         return request;
     }
 
