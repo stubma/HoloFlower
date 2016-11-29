@@ -65,10 +65,13 @@ public class FlowerController : MonoBehaviour {
 		Destroy(flowerCollider);
 
 		// duplicate without rotation
-		fixedDup = UnityEngine.Object.Instantiate(gameObject);
-		Destroy(fixedDup.GetComponent<FlowerController>());
-		Destroy(fixedDup.GetComponent<BoxCollider>());
-		Helper.TreeDisableRenderer(fixedDup);
+		fixedDup = new GameObject();
+		fixedDup.transform.position = Vector3.zero;
+		fixedDup.transform.localRotation = Quaternion.identity;
+	}
+
+	void OnDestroy() {
+		Destroy(fixedDup);
 	}
 
 	void Update () {
@@ -178,7 +181,8 @@ public class FlowerController : MonoBehaviour {
 
 	public void RotateFixedDup(Vector3 axis, float angle) {
 		Quaternion r = fixedDup.transform.localRotation;
-		fixedDup.transform.localRotation = r * Quaternion.AngleAxis(angle, axis);
+		Vector3 localAxis = fixedDup.transform.InverseTransformPoint(axis);
+		fixedDup.transform.localRotation = r * Quaternion.AngleAxis(angle, localAxis);
 	}
 
 	public Quaternion GetFixedDupRotation() {
